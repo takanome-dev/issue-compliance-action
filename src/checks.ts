@@ -43,7 +43,7 @@ export function checkTitle(title: string, issue_templates_types: string[]) {
       errors: [
         {
           message:
-            'Title cannot contain < or >. Please remove them and provide a clear description.'
+            'Title cannot contain < or >. Removing these characters will allow the check to pass.'
         }
       ]
     }

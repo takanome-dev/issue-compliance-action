@@ -1,8 +1,8 @@
 {
   "env": {
     "node": true,
-    "es6": true,
-    "jest/globals": true
+    "es6": true
+    // "jest/globals": true
   },
   "extends": [
     "plugin:github/recommended",
@@ -15,7 +15,7 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": ["jest", "@typescript-eslint"],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     // These rules would be nice to enable / make more strict eventually
     "@typescript-eslint/no-floating-promises": "off",
