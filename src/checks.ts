@@ -1,51 +1,53 @@
-import conventionalConfig from 'conventional-changelog-conventionalcommits'
-import * as conventionalTypes from 'conventional-commit-types'
-import {sync} from 'conventional-commits-parser'
+import * as core from '@actions/core'
 
-type LintRuleOutcome = {
-  message: string
-  valid: boolean
+// function checkBody(body: string, regexString: string): boolean {
+//   const regex = new RegExp(regexString, 'mi')
+//   const bodyNoComments = body.replace(/<!--(.*?)-->/gms, '')
+//   return regex.test(bodyNoComments)
+// }
+
+// function checkBranch(branch: string, protectedBranch: string): boolean {
+//   return branch !== protectedBranch
+// }
+
+export function escapeChecks(checkResult: boolean, message: string) {
+  core.info(message)
+  // core.setOutput('body-check', checkResult)
+  core.setOutput('title-check', checkResult)
 }
 
-function checkBody(body: string, regexString: string): boolean {
-  const regex = new RegExp(regexString, 'mi')
-  const bodyNoComments = body.replace(/<!--(.*?)-->/gms, '')
-  return regex.test(bodyNoComments)
-}
+export function checkTitle(title: string, issue_templates_types: string[]) {
+  const regex1 = new RegExp(
+    `^(${issue_templates_types.join('|')})(:)(\\s)(\\w|\\s)+`,
+    'mi'
+  )
 
-function checkBranch(branch: string, protectedBranch: string): boolean {
-  return branch !== protectedBranch
-}
-
-async function checkTitle(
-  title: string
-): Promise<{valid: boolean; errors: LintRuleOutcome[]}> {
-  const {parserOpts} = await conventionalConfig()
-  const defaultTypes = Object.keys(conventionalTypes.types)
-  try {
-    const result = sync(title, parserOpts)
-    const errors: LintRuleOutcome[] = []
-    if (!defaultTypes.includes(result.type))
-      errors.push({
-        valid: false,
-        message: `Found type "${
-          result.type
-        }", must be one of "${defaultTypes.join('","')}"`
-      })
-    if (!result.subject)
-      errors.push({valid: false, message: 'No subject found'})
-    return {valid: errors.length === 0, errors}
-  } catch (error) {
+  if (!regex1.test(title)) {
     return {
       valid: false,
       errors: [
         {
-          valid: false,
-          message: error instanceof Error ? error.message : 'Unknown Error'
+          message: `Title does not match the required format. The format must be one of the following: ${issue_templates_types.join(
+            ', '
+          )}`
         }
       ]
     }
   }
-}
 
-export {checkBody, checkBranch, checkTitle}
+  const regex2 = new RegExp(`^(?!.*(<|>)).*`, 'mi')
+
+  if (!regex2.test(title)) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message:
+            'Title cannot contain < or >. Please remove them and provide a clear description.'
+        }
+      ]
+    }
+  }
+
+  return {valid: true, errors: []}
+}

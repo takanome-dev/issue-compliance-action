@@ -1,126 +1,70 @@
-name: 'PR Compliance Action'
+name: 'Issue Compliance Action'
 description: >
-  Action to check PR compliance on various aspects to improve maintainer QOL.
-branding:
-  icon: git-pull-request
-  color: green
-author: 'Matthew Foley'
+  Action to check issues for compliance on the title and required body infos
+# branding:
+#   icon: git-pull-request
+#   color: green
+# author: 'Matthew Foley'
 inputs:
-  repo-token:
+  token:
     required: false
-    description: 'Repo Access Token'
+    description: Github token
     default: ${{ github.token }}
-  ignore-authors:
-    required: true
-    description: >
-      PR Authors to ignore (e.g. dependabot). All checks will be skipped and action outputs will be
-      set to true if the PR has one of these authors.
-    default: |
-      dependabot
-      dependabot[bot]
-  ignore-team-members:
-    required: true
-    description: >
-      Whether to ignore in the case that the PR author is a) the owner of repository, or b) has a
-      public membership in the org that owns the repository. If set to true and either of these
-      cases are satisfied, all checks will be skipped and action outputs will be set to true.
-    default: true
+  # ignore-authors:
+  #   required: true
+  #   description: >
+  #     PR Authors to ignore (e.g. dependabot). All checks will be skipped and action outputs will be
+  #     set to true if the PR has one of these authors.
+  #   default: |
+  #     dependabot
+  #     dependabot[bot]
+  # ignore-team-members:
+  #   required: true
+  #   description: >
+  #     Whether to ignore in the case that the PR author is a) the owner of repository, or b) has a
+  #     public membership in the org that owns the repository. If set to true and either of these
+  #     cases are satisfied, all checks will be skipped and action outputs will be set to true.
+  #   default: true
   base-comment:
     required: true
     description: >
-      Preamble portion to have on any comments made by the action. Because multiple checks are run,
-      the action may have multiple sections to any generated comment.
+      Preamble portion to have on any comments made by the action. Because multiple checks are run, the action may have multiple sections to any generated comment.
     default: >
-      # PR Compliance Checks
+      # Issue Compliance Checks
 
-      Thank you for your Pull Request! We have run several checks on this pull request in order
-      to make sure it's suitable for merging into this project.  The results are listed in the 
-      following section.
-  body-regex:
-    required: true
-    description: 'PR Body Regex'
-    default: '(fix(es|ed)?|((resolve|close)(s|d)?)) #\d*[1-9]\d*'
-  body-fail:
+      Thank you for filling this issue! We have run several checks on this issue in order
+      to make sure it compliant with our contributing guidelines. Please review the checks
+      below and make any necessary changes to this issue. Once all checks have passed, we
+      will be able to triage this issue and take the next steps.
+  issue-templates-types:
     required: true
     description: >
-      Whether to trigger a failing check when the body-regex is not matched in the PR body.
-    default: false
-  body-auto-close:
-    required: true
-    description: 'Whether or not to auto-close on failed check of PR Body'
-    default: true
-  body-comment:
-    required: true
-    description: 'Comment to leave on PR on failed check of PR Body'
-    default: >
-      ## Issue Reference
-      
-      In order to be considered for merging, the pull request description must refer to a 
-      specific issue number. This is described in our Contributing Guide. We are closing this 
-      pull request for now but you can update the pull request description and reopen the pull 
-      request.
-
-      The check is looking for a phrase similar to: "Fixes #XYZ" or "Resolves #XYZ" where XYZ is the issue
-      number that this PR is meant to address.
-  protected-branch:
-    required: true
-    description: 'Protected Branch'
-    default: ''
-  protected-branch-auto-close:
-    required: true
-    description: Whether or not to auto-close on failed check of PR head branch'
-    default: true
-  protected-branch-comment:
-    required: true
-    description: 'Comment to leave on PR on failed check of PR head branch.'
-    default: >
-      ## Protected Branch
-      
-      In order to be considered for merging, the pull request changes must 
-      not be implemented on the "%branch%" branch. This is described in our Contributing Guide. 
-      We are closing this pull request and we would suggest that you implement your changes as 
-      described in our Contributing Guide and open a new pull request.
+      The types of issue templates to check against. If the issue does not have one of these templates, the check will fail and the issue will be marked as invalid.
+    default: |
+      Feature Request
+      Bug Report
+      Question
   title-check-enable:
     required: true
-    description: 'Whether or not to lint PR title per [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)'
+    description: Whether or not to lint the issue title
     default: true
-  title-comment: 
+  title-comment:
     required: true
-    description: 'Comment to leave on PR on failed check of PR title per [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)'
+    description: Comment to leave on issue on failed check of the issue title
     default: >
-      ## Conventional Commit PR Title
-      
-      In order to be considered for merging, the pull request title must match the specification in 
-      [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). You can edit
-      the title in order for this check to pass.
+      ## Issue Title Format
 
-      Most often, our PR titles are something like one of these:
-
-      - docs: correct typo in README
-
-      - feat: implement dark mode"
-      
-      - fix: correct remove button behavior
-  watch-files:
-    required: true
-    description: 'Files to flag modifications'
-    default: ''
-  watch-files-comment:
-    required: true
-    description: 'Comment to leave on PR when watched files have been changed.'
-    default: >
-      ## Watched Files
-      
-      This pull request modifies specific files that require careful review by the maintainers.
+      In order to be considered for triage, the issue title must match the specification below.
+      Please update the title to match the specification in order for this check to pass.
 outputs:
-  body-check:
-    description: 'Result of match for PR Body against configured regex.'
-  branch-check:
-    description: 'Result of check to ensure PR head is not protected branch.'
+  # body-check:
+  #   description: 'Result of match for PR Body against configured regex.'
+  # branch-check:
+  #   description: 'Result of check to ensure PR head is not protected branch.'
   title-check:
-    description: 'Result of check to ensure PR title is formatted per [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)'
-  watch-files-check:
-    description: 'Result of check for watched files having been modified. True if no modifications found to watched files.'
+    description: Result of check to ensure the issue title is formatted correctly.
+  # watch-files-check:
+  #   description: 'Result of check for watched files having been modified. True if no modifications found to watched files.'
 runs:
-  using: 'node16'
+  using: 'node18'
   main: 'dist/index.js'
