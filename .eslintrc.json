@@ -1,0 +1,37 @@
+{
+  "env": {
+    "node": true,
+    "es6": true,
+    "jest/globals": true
+  },
+  "extends": [
+    "plugin:github/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 9,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["jest", "@typescript-eslint"],
+  "rules": {
+    // These rules would be nice to enable / make more strict eventually
+    "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-return": "off",
+    "@typescript-eslint/restrict-template-expressions": [
+      "error",
+      {"allowAny": true}
+    ],
+
+    // These rules do not match our code style
+    "camelcase": "off",
+    "i18n-text/no-en": "off",
+    "import/no-namespace": "off"
+  }
+}
