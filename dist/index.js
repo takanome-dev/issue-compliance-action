@@ -53,7 +53,9 @@ function checkTitle(title, issueTypes, charactersToExclude) {
             valid: false,
             errors: [
                 {
-                    message: `The title does not match the required format. The format must be one of the following: \n${issueTypes.map(t => `- ${t}\n`)}`
+                    message: `The title does not match the required format. The format must be one of the following: \n${issueTypes
+                        .map(t => `- ${t}\n`)
+                        .join('')}`
                 }
             ]
         };
@@ -64,7 +66,9 @@ function checkTitle(title, issueTypes, charactersToExclude) {
             valid: false,
             errors: [
                 {
-                    message: `The title cannot contain the following characters: \n${charactersToExclude.map(c => `- ${c}\n`)}`
+                    message: `The title cannot contain the following characters: \n${charactersToExclude
+                        .map(c => `- ${c}\n`)
+                        .join('')}`
                 }
             ]
         };
