@@ -127,7 +127,7 @@ async function updateReview(
       await client.rest.issues.updateComment({
         ...issue,
         comment_id: comment.id,
-        body: 'Issue Compliance Checks Passed!'
+        body: 'Issue Compliance Checks Passed! :tada:'
       }),
       await client.rest.issues.removeLabel({
         ...issue,

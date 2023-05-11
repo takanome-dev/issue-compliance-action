@@ -39,7 +39,7 @@ inputs:
     default: >
       ## Issue Title Format :pencil2:
 
-      In order to be considered for triage, the issue title must match the specification below:
+      In order for this issue to be considered for triage, the issue title must match the specification below:
   characters-to-exclude:
     required: false
     description: >
