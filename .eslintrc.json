@@ -32,6 +32,7 @@
     // These rules do not match our code style
     "camelcase": "off",
     "i18n-text/no-en": "off",
-    "import/no-namespace": "off"
+    "import/no-namespace": "off",
+    "no-console": "warn"
   }
 }

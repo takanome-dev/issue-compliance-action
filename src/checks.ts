@@ -18,7 +18,7 @@ export function escapeChecks(checkResult: boolean, message: string) {
 
 export function checkTitle(title: string, issue_templates_types: string[]) {
   const regex1 = new RegExp(
-    `^(${issue_templates_types.join('|')})(:)(\\s)(\\w|\\s)+`,
+    `^(${issue_templates_types.join('|')})(:)(\\s).*`,
     'mi'
   )
 
@@ -27,7 +27,7 @@ export function checkTitle(title: string, issue_templates_types: string[]) {
       valid: false,
       errors: [
         {
-          message: `Title does not match the required format. The format must be one of the following: ${issue_templates_types.join(
+          message: `The title does not match the required format. The format must be one of the following: ${issue_templates_types.join(
             ', '
           )}`
         }
@@ -35,15 +35,18 @@ export function checkTitle(title: string, issue_templates_types: string[]) {
     }
   }
 
-  const regex2 = new RegExp(`^(?!.*(<|>)).*`, 'mi')
+  const characters = ['<', '>', '#', '&']
+
+  const regex2 = new RegExp(`^(?!.*(${characters.join('|')})).*`, 'mi')
 
   if (!regex2.test(title)) {
     return {
       valid: false,
       errors: [
         {
-          message:
-            'Title cannot contain < or >. Removing these characters will allow the check to pass.'
+          message: `The title cannot contain the following characters: ${characters.join(
+            ', '
+          )}`
         }
       ]
     }
