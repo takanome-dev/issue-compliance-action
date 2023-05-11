@@ -16,18 +16,19 @@ export function escapeChecks(checkResult: boolean, message: string) {
   core.setOutput('title-check', checkResult)
 }
 
-export function checkTitle(title: string, issue_templates_types: string[]) {
-  const regex1 = new RegExp(
-    `^(${issue_templates_types.join('|')})(:)(\\s).*`,
-    'mi'
-  )
+export function checkTitle(
+  title: string,
+  issueTypes: string[],
+  charactersToExclude: string[]
+) {
+  const regex1 = new RegExp(`^(${issueTypes.join('|')})(:)(\\s).*`, 'mi')
 
   if (!regex1.test(title)) {
     return {
       valid: false,
       errors: [
         {
-          message: `The title does not match the required format. The format must be one of the following: ${issue_templates_types.join(
+          message: `The title does not match the required format. The format must be one of the following: ${issueTypes.join(
             ', '
           )}`
         }
@@ -35,16 +36,14 @@ export function checkTitle(title: string, issue_templates_types: string[]) {
     }
   }
 
-  const characters = ['<', '>', '#', '&']
-
-  const regex2 = new RegExp(`^(?!.*(${characters.join('|')})).*`, 'mi')
+  const regex2 = new RegExp(`^(?!.*(${charactersToExclude.join('|')})).*`, 'mi')
 
   if (!regex2.test(title)) {
     return {
       valid: false,
       errors: [
         {
-          message: `The title cannot contain the following characters: ${characters.join(
+          message: `The title cannot contain the following characters: ${charactersToExclude.join(
             ', '
           )}`
         }

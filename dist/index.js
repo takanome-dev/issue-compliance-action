@@ -46,26 +46,25 @@ function escapeChecks(checkResult, message) {
     core.setOutput('title-check', checkResult);
 }
 exports.escapeChecks = escapeChecks;
-function checkTitle(title, issue_templates_types) {
-    const regex1 = new RegExp(`^(${issue_templates_types.join('|')})(:)(\\s).*`, 'mi');
+function checkTitle(title, issueTypes, charactersToExclude) {
+    const regex1 = new RegExp(`^(${issueTypes.join('|')})(:)(\\s).*`, 'mi');
     if (!regex1.test(title)) {
         return {
             valid: false,
             errors: [
                 {
-                    message: `The title does not match the required format. The format must be one of the following: ${issue_templates_types.join(', ')}`
+                    message: `The title does not match the required format. The format must be one of the following: ${issueTypes.join(', ')}`
                 }
             ]
         };
     }
-    const characters = ['<', '>', '#', '&'];
-    const regex2 = new RegExp(`^(?!.*(${characters.join('|')})).*`, 'mi');
+    const regex2 = new RegExp(`^(?!.*(${charactersToExclude.join('|')})).*`, 'mi');
     if (!regex2.test(title)) {
         return {
             valid: false,
             errors: [
                 {
-                    message: `The title cannot contain the following characters: ${characters.join(', ')}`
+                    message: `The title cannot contain the following characters: ${charactersToExclude.join(', ')}`
                 }
             ]
         };
@@ -117,62 +116,46 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(7733));
 const github = __importStar(__nccwpck_require__(3695));
-const utils_1 = __nccwpck_require__(552);
 const checks_1 = __nccwpck_require__(6455);
-// type PullRequestReview = {
-//   id: number
-//   node_id: string
-//   user: {
-//     login: string
-//     id: number
-//     node_id: string
-//   } | null
-//   body: string
-//   state: string
-// }
 const repoToken = core.getInput('token');
 const baseComment = core.getInput('base-comment');
 const titleComment = core.getInput('title-comment');
 const issueTemplateTypes = core.getInput('issue-template-types');
+const charactersToExclude = core.getInput('characters-to-exclude');
 const titleCheckEnable = core.getBooleanInput('title-check-enable');
 const client = github.getOctokit(repoToken);
 function run() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ctx = github.context;
             const issue = ctx.issue;
-            const repoOwner = utils_1.context.repo.owner;
             const isClosed = ((_b = (_a = ctx.payload.issue) === null || _a === void 0 ? void 0 : _a.state) !== null && _b !== void 0 ? _b : 'open').toLowerCase() === 'closed';
-            // console.log({repoOwner, issue, isClosed})
             if (isClosed) {
                 (0, checks_1.escapeChecks)(false, 'The issue is closed, skipping checks, setting all outputs to false.');
                 return;
             }
-            const author = (_e = (_d = (_c = ctx.payload.issue) === null || _c === void 0 ? void 0 : _c.user) === null || _d === void 0 ? void 0 : _d.login) !== null && _e !== void 0 ? _e : '';
-            const body = (_g = (_f = ctx.payload.issue) === null || _f === void 0 ? void 0 : _f.body) !== null && _g !== void 0 ? _g : '';
-            const title = (_j = (_h = ctx.payload.issue) === null || _h === void 0 ? void 0 : _h.title) !== null && _j !== void 0 ? _j : '';
-            console.log({ issueTemplateTypes, title, titleComment });
-            const refactoredIssueTemplateTypes = issueTemplateTypes
+            const title = (_d = (_c = ctx.payload.issue) === null || _c === void 0 ? void 0 : _c.title) !== null && _d !== void 0 ? _d : '';
+            // TODO: remove any type assertion
+            const filteredIssueTypes = issueTemplateTypes
                 .split('\n')
                 .filter((x) => x !== '');
-            console.log({ refactoredIssueTemplateTypes });
+            const filteredCharactersToExclude = charactersToExclude
+                .split('\n')
+                .filter((x) => x !== '');
             const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
                 ? { valid: true, errors: [] }
-                : (0, checks_1.checkTitle)(title, issueTemplateTypes.split(','));
+                : (0, checks_1.checkTitle)(title, filteredIssueTypes, filteredCharactersToExclude);
             const prCompliant = titleCheck;
-            console.log({ prCompliant });
             core.setOutput('title-check', titleCheck);
             const commentsToLeave = [];
             if (!prCompliant) {
-                // if (!titleCheck) {
-                core.setFailed(`This issue title should conform to the following format: ${issueTemplateTypes}`);
+                core.setFailed(`This issue title should conform to the following format: ${filteredIssueTypes.map((type) => `\n- ${type}:`)}`);
                 const errorsComment = `\n\nLinting Errors\n${titleErrors
                     .map(error => `\n- ${error.message}`)
                     .join('')}`;
                 if (titleComment !== '')
                     commentsToLeave.push(titleComment + errorsComment);
-                // }
                 // Update Review as needed
                 let reviewBody = '';
                 if (commentsToLeave.length > 0)
@@ -193,7 +176,6 @@ function findExistingComment(issue) {
     return __awaiter(this, void 0, void 0, function* () {
         let comment;
         const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, issue), { per_page: 100 }));
-        console.log({ comments });
         comment = comments.find(innerComment => {
             var _a, _b;
             return ((_b = (_a = innerComment === null || innerComment === void 0 ? void 0 : innerComment.user) === null || _a === void 0 ? void 0 : _a.login) !== null && _b !== void 0 ? _b : '') === 'github-actions[bot]';

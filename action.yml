@@ -10,21 +10,6 @@ inputs:
     required: false
     description: Github token
     default: ${{ github.token }}
-  # ignore-authors:
-  #   required: true
-  #   description: >
-  #     PR Authors to ignore (e.g. dependabot). All checks will be skipped and action outputs will be
-  #     set to true if the PR has one of these authors.
-  #   default: |
-  #     dependabot
-  #     dependabot[bot]
-  # ignore-team-members:
-  #   required: true
-  #   description: >
-  #     Whether to ignore in the case that the PR author is a) the owner of repository, or b) has a
-  #     public membership in the org that owns the repository. If set to true and either of these
-  #     cases are satisfied, all checks will be skipped and action outputs will be set to true.
-  #   default: true
   base-comment:
     required: true
     description: >
@@ -49,13 +34,22 @@ inputs:
     description: Whether or not to lint the issue title
     default: true
   title-comment:
-    required: true
+    required: false
     description: Comment to leave on issue on failed check of the issue title
     default: >
       ## Issue Title Format
 
       In order to be considered for triage, the issue title must match the specification below.
       Please update the title to match the specification in order for this check to pass.
+  characters-to-exclude:
+    required: false
+    description: >
+      Characters to exclude from the issue title. If the issue title contains any of these characters, the check will fail and the issue will be marked as invalid.
+    default: |
+      <
+      >
+      #
+      &
 outputs:
   # body-check:
   #   description: 'Result of match for PR Body against configured regex.'

@@ -1,25 +1,13 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {context} from '@actions/github/lib/utils'
 import {checkTitle, escapeChecks} from './checks'
-import {Comment, Issue} from './types'
-
-// type PullRequestReview = {
-//   id: number
-//   node_id: string
-//   user: {
-//     login: string
-//     id: number
-//     node_id: string
-//   } | null
-//   body: string
-//   state: string
-// }
+import {Comment} from './types'
 
 const repoToken = core.getInput('token')
 const baseComment = core.getInput('base-comment')
 const titleComment = core.getInput('title-comment')
 const issueTemplateTypes = core.getInput('issue-template-types')
+const charactersToExclude = core.getInput('characters-to-exclude')
 const titleCheckEnable = core.getBooleanInput('title-check-enable')
 const client = github.getOctokit(repoToken)
 
@@ -27,11 +15,9 @@ async function run(): Promise<void> {
   try {
     const ctx = github.context
     const issue = ctx.issue
-    const repoOwner = context.repo.owner
 
     const isClosed =
       (ctx.payload.issue?.state ?? 'open').toLowerCase() === 'closed'
-    // console.log({repoOwner, issue, isClosed})
 
     if (isClosed) {
       escapeChecks(
@@ -41,39 +27,40 @@ async function run(): Promise<void> {
       return
     }
 
-    const author = ctx.payload.issue?.user?.login ?? ''
-    const body = ctx.payload.issue?.body ?? ''
     const title = ctx.payload.issue?.title ?? ''
 
-    console.log({issueTemplateTypes, title, titleComment})
-
-    const refactoredIssueTemplateTypes = issueTemplateTypes
+    // TODO: remove any type assertion
+    const filteredIssueTypes = issueTemplateTypes
       .split('\n')
-      .filter((x: string) => x !== '')
-    console.log({refactoredIssueTemplateTypes})
+      .filter((x: string) => x !== '') as any[]
+
+    const filteredCharactersToExclude = charactersToExclude
+      .split('\n')
+      .filter((x: string) => x !== '') as any[]
+
     const {valid: titleCheck, errors: titleErrors} = !titleCheckEnable
       ? {valid: true, errors: []}
-      : checkTitle(title, issueTemplateTypes.split(','))
+      : checkTitle(title, filteredIssueTypes, filteredCharactersToExclude)
 
     const prCompliant = titleCheck
-    console.log({prCompliant})
 
     core.setOutput('title-check', titleCheck)
 
     const commentsToLeave = []
 
     if (!prCompliant) {
-      // if (!titleCheck) {
       core.setFailed(
-        `This issue title should conform to the following format: ${issueTemplateTypes}`
+        `This issue title should conform to the following format: ${filteredIssueTypes.map(
+          (type: any) => `\n- ${type}:`
+        )}`
       )
+
       const errorsComment = `\n\nLinting Errors\n${titleErrors
         .map(error => `\n- ${error.message}`)
         .join('')}`
 
       if (titleComment !== '')
         commentsToLeave.push(titleComment + errorsComment)
-      // }
 
       // Update Review as needed
       let reviewBody = ''
@@ -105,8 +92,6 @@ async function findExistingComment(issue: {
     ...issue,
     per_page: 100
   })
-
-  console.log({comments})
 
   comment = comments.find(innerComment => {
     return (innerComment?.user?.login ?? '') === 'github-actions[bot]'
