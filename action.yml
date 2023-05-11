@@ -1,10 +1,11 @@
 name: 'Issue Compliance Action'
 description: >
   Action to check issues for compliance on the title and required body infos
-# branding:
-#   icon: git-pull-request
-#   color: green
-# author: 'Matthew Foley'
+branding:
+  icon: check-circle
+  color: green
+author: 'TAKANOME DEV'
+
 inputs:
   token:
     required: false
