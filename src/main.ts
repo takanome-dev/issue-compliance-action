@@ -49,11 +49,13 @@ async function run(): Promise<void> {
     const commentsToLeave = []
 
     if (!prCompliant) {
-      core.setFailed(
-        `This issue title should conform to the following format: ${filteredIssueTypes.map(
-          (type: any) => `\n- ${type}:`
-        )}`
-      )
+      core
+        .setFailed(
+          `This issue title should conform to the following format: \n${filteredIssueTypes.map(
+            (type: any) => `\n- ${type}`
+          )}`
+        )
+        .join('')
 
       const errorsComment = `\n\nLinting Errors\n${titleErrors
         .map(error => `\n- ${error.message}`)
@@ -113,19 +115,31 @@ async function updateReview(
   if (body === comment?.body) return
   // if no existing review, body non blank, create a review
   if (comment === null && body !== '') {
-    await client.rest.issues.createComment({
-      ...issue,
-      body
-    })
+    await Promise.all([
+      await client.rest.issues.createComment({
+        ...issue,
+        body
+      }),
+      await client.rest.issues.addLabels({
+        ...issue,
+        labels: [':no_entry: invalid title']
+      })
+    ])
     return
   }
   // if body blank and review exists, update it to show passed
   if (comment !== null && body === '') {
-    await client.rest.issues.updateComment({
-      ...issue,
-      comment_id: comment.id,
-      body: 'Issue Compliance Checks Passed!'
-    })
+    await Promise.all([
+      await client.rest.issues.updateComment({
+        ...issue,
+        comment_id: comment.id,
+        body: 'Issue Compliance Checks Passed!'
+      }),
+      await client.rest.issues.removeLabel({
+        ...issue,
+        name: ':no_entry: invalid title'
+      })
+    ])
     return
   }
   // if body non-blank and review exists, update it

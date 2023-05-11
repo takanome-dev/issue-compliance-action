@@ -28,8 +28,8 @@ export function checkTitle(
       valid: false,
       errors: [
         {
-          message: `The title does not match the required format. The format must be one of the following: ${issueTypes.join(
-            ', '
+          message: `The title does not match the required format. The format must be one of the following: \n${issueTypes.join(
+            `- \n`
           )}`
         }
       ]
@@ -43,8 +43,8 @@ export function checkTitle(
       valid: false,
       errors: [
         {
-          message: `The title cannot contain the following characters: ${charactersToExclude.join(
-            ', '
+          message: `The title cannot contain the following characters: \n${charactersToExclude.join(
+            `- \n`
           )}`
         }
       ]
