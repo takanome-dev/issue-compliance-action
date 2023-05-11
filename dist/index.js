@@ -133,7 +133,7 @@ const checks_1 = __nccwpck_require__(6455);
 const repoToken = core.getInput('token');
 const baseComment = core.getInput('base-comment');
 const titleComment = core.getInput('title-comment');
-const issueTemplatesTypes = core.getInput('issue-templates-types');
+const issueTemplateTypes = core.getInput('issue-template-types');
 const titleCheckEnable = core.getBooleanInput('title-check-enable');
 const client = github.getOctokit(repoToken);
 function run() {
@@ -144,7 +144,7 @@ function run() {
             const issue = ctx.issue;
             const repoOwner = utils_1.context.repo.owner;
             const isClosed = ((_b = (_a = ctx.payload.issue) === null || _a === void 0 ? void 0 : _a.state) !== null && _b !== void 0 ? _b : 'open').toLowerCase() === 'closed';
-            console.log({ repoOwner, issue, isClosed });
+            // console.log({repoOwner, issue, isClosed})
             if (isClosed) {
                 (0, checks_1.escapeChecks)(false, 'The issue is closed, skipping checks, setting all outputs to false.');
                 return;
@@ -152,23 +152,27 @@ function run() {
             const author = (_e = (_d = (_c = ctx.payload.issue) === null || _c === void 0 ? void 0 : _c.user) === null || _d === void 0 ? void 0 : _d.login) !== null && _e !== void 0 ? _e : '';
             const body = (_g = (_f = ctx.payload.issue) === null || _f === void 0 ? void 0 : _f.body) !== null && _g !== void 0 ? _g : '';
             const title = (_j = (_h = ctx.payload.issue) === null || _h === void 0 ? void 0 : _h.title) !== null && _j !== void 0 ? _j : '';
-            console.log({ author, body, title });
+            console.log({ issueTemplateTypes, title, titleComment });
+            const refactoredIssueTemplateTypes = issueTemplateTypes
+                .split('\n')
+                .filter((x) => x !== '');
+            console.log({ refactoredIssueTemplateTypes });
             const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
                 ? { valid: true, errors: [] }
-                : (0, checks_1.checkTitle)(title, issueTemplatesTypes.split(','));
+                : (0, checks_1.checkTitle)(title, issueTemplateTypes.split(','));
             const prCompliant = titleCheck;
             console.log({ prCompliant });
             core.setOutput('title-check', titleCheck);
             const commentsToLeave = [];
             if (!prCompliant) {
-                if (!titleCheck) {
-                    core.setFailed(`This issue title should conform to the following format: ${issueTemplatesTypes}`);
-                    const errorsComment = `\n\nLinting Errors\n${titleErrors
-                        .map(error => `\n- ${error.message}`)
-                        .join('')}`;
-                    if (titleComment !== '')
-                        commentsToLeave.push(titleComment + errorsComment);
-                }
+                // if (!titleCheck) {
+                core.setFailed(`This issue title should conform to the following format: ${issueTemplateTypes}`);
+                const errorsComment = `\n\nLinting Errors\n${titleErrors
+                    .map(error => `\n- ${error.message}`)
+                    .join('')}`;
+                if (titleComment !== '')
+                    commentsToLeave.push(titleComment + errorsComment);
+                // }
                 // Update Review as needed
                 let reviewBody = '';
                 if (commentsToLeave.length > 0)

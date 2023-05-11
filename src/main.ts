@@ -47,9 +47,9 @@ async function run(): Promise<void> {
 
     console.log({issueTemplateTypes, title, titleComment})
 
-    const refactoredIssueTemplateTypes = (issueTemplateTypes as string)
+    const refactoredIssueTemplateTypes = issueTemplateTypes
       .split('\n')
-      .filter(x => x !== '')
+      .filter((x: string) => x !== '')
     console.log({refactoredIssueTemplateTypes})
     const {valid: titleCheck, errors: titleErrors} = !titleCheckEnable
       ? {valid: true, errors: []}
@@ -65,9 +65,7 @@ async function run(): Promise<void> {
     if (!prCompliant) {
       // if (!titleCheck) {
       core.setFailed(
-        `This issue title should conform to the following format: ${issueTemplatesTypes.map(
-          type => `\n- ${type}`
-        )}`
+        `This issue title should conform to the following format: ${issueTemplateTypes}`
       )
       const errorsComment = `\n\nLinting Errors\n${titleErrors
         .map(error => `\n- ${error.message}`)
