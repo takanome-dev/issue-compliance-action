@@ -1,36 +1,38 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "issue-compliance-action",
+  "version": "0.1.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "An action to check if an issue is compliant with the issue template",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint src/*.ts src/**/*.ts",
+    "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
-    "test": "jest",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "all": "npm run lint && npm run format && npm test && npm run build  && npm run package"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/takanome-dev/issue-compliance-action.git"
   },
+  "homepage": "https://github.com/takanome-dev/issue-compliance-action#readme",
+  "bugs": "https://github.com/takanome-dev/issue-compliance-action/issues",
   "keywords": [
     "actions",
     "node",
     "setup"
   ],
-  "author": "",
+  "author": "takanome-dev <takanomedev221@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^5.1.1",
     "@octokit/core": "^4.2.0",
-    "conventional-changelog-conventionalcommits": "^5.0.0",
-    "conventional-commit-types": "^3.0.0",
-    "conventional-commits-parser": "^3.2.4"
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/node": "^18.11.13",
@@ -39,11 +41,9 @@
     "@vercel/ncc": "^0.36.1",
     "eslint": "^8.33.0",
     "eslint-plugin-github": "^4.6.0",
-    "eslint-plugin-jest": "^27.1.7",
-    "jest": "^29.0.0",
     "js-yaml": "^4.1.0",
     "prettier": "2.8.8",
-    "ts-jest": "^29.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^0.31.0"
   }
 }
