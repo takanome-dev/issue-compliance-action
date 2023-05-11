@@ -40,10 +40,10 @@ inputs:
     required: true
     description: >
       The types of issue templates to check against. If the issue does not have one of these templates, the check will fail and the issue will be marked as invalid.
-    default: |
-      Feature Request
-      Bug Report
-      Question
+    default:
+      - Feature Request
+      - Bug Report
+      - Question
   title-check-enable:
     required: true
     description: Whether or not to lint the issue title

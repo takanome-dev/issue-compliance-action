@@ -31,7 +31,7 @@ async function run(): Promise<void> {
 
     const isClosed =
       (ctx.payload.issue?.state ?? 'open').toLowerCase() === 'closed'
-    console.log({repoOwner, issue, isClosed})
+    // console.log({repoOwner, issue, isClosed})
 
     if (isClosed) {
       escapeChecks(
@@ -45,7 +45,7 @@ async function run(): Promise<void> {
     const body = ctx.payload.issue?.body ?? ''
     const title = ctx.payload.issue?.title ?? ''
 
-    console.log({author, body, title})
+    console.log({issueTemplatesTypes, title, titleComment})
 
     const {valid: titleCheck, errors: titleErrors} = !titleCheckEnable
       ? {valid: true, errors: []}
@@ -59,17 +59,17 @@ async function run(): Promise<void> {
     const commentsToLeave = []
 
     if (!prCompliant) {
-      if (!titleCheck) {
-        core.setFailed(
-          `This issue title should conform to the following format: ${issueTemplatesTypes}`
-        )
-        const errorsComment = `\n\nLinting Errors\n${titleErrors
-          .map(error => `\n- ${error.message}`)
-          .join('')}`
+      // if (!titleCheck) {
+      // core.setFailed(
+      //   `This issue title should conform to the following format: ${issueTemplatesTypes}`
+      // )
+      const errorsComment = `\n\nLinting Errors\n${titleErrors
+        .map(error => `\n- ${error.message}`)
+        .join('')}`
 
-        if (titleComment !== '')
-          commentsToLeave.push(titleComment + errorsComment)
-      }
+      if (titleComment !== '')
+        commentsToLeave.push(titleComment + errorsComment)
+      // }
 
       // Update Review as needed
       let reviewBody = ''
