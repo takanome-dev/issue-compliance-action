@@ -19,7 +19,7 @@ import {Comment, Issue} from './types'
 const repoToken = core.getInput('token')
 const baseComment = core.getInput('base-comment')
 const titleComment = core.getInput('title-comment')
-const issueTemplatesTypes = core.getInput('issue-templates-types')
+const issueTemplateTypes = core.getInput('issue-template-types')
 const titleCheckEnable = core.getBooleanInput('title-check-enable')
 const client = github.getOctokit(repoToken)
 
@@ -45,11 +45,15 @@ async function run(): Promise<void> {
     const body = ctx.payload.issue?.body ?? ''
     const title = ctx.payload.issue?.title ?? ''
 
-    console.log({issueTemplatesTypes, title, titleComment})
+    console.log({issueTemplateTypes, title, titleComment})
 
+    const refactoredIssueTemplateTypes = (issueTemplateTypes as string)
+      .split('\n')
+      .filter(x => x !== '')
+    console.log({refactoredIssueTemplateTypes})
     const {valid: titleCheck, errors: titleErrors} = !titleCheckEnable
       ? {valid: true, errors: []}
-      : checkTitle(title, issueTemplatesTypes.split(','))
+      : checkTitle(title, issueTemplateTypes.split(','))
 
     const prCompliant = titleCheck
     console.log({prCompliant})
@@ -60,9 +64,11 @@ async function run(): Promise<void> {
 
     if (!prCompliant) {
       // if (!titleCheck) {
-      // core.setFailed(
-      //   `This issue title should conform to the following format: ${issueTemplatesTypes}`
-      // )
+      core.setFailed(
+        `This issue title should conform to the following format: ${issueTemplatesTypes.map(
+          type => `\n- ${type}`
+        )}`
+      )
       const errorsComment = `\n\nLinting Errors\n${titleErrors
         .map(error => `\n- ${error.message}`)
         .join('')}`
