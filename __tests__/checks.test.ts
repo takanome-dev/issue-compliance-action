@@ -8,10 +8,8 @@ test('should return false if there is no title', async () => {
   const {valid, errors} = checkTitle('', issueTemplatesTypes, characters)
   expect(valid).toBeFalsy()
   expect(errors.length).toBeGreaterThan(0)
-  expect(errors[0].message).toBe(
-    `The title does not match the required format. The format must be one of the following: ${issueTemplatesTypes.join(
-      ', '
-    )}`
+  expect(errors[0].message).toContain(
+    `The title does not match the required format`
   )
 })
 
@@ -24,10 +22,8 @@ test('should return false on bad feature title', async () => {
   )
   expect(valid).toBeFalsy()
   expect(errors.length).toBeGreaterThan(0)
-  expect(errors[0].message).toBe(
-    `The title does not match the required format. The format must be one of the following: ${issueTemplatesTypes.join(
-      ', '
-    )}`
+  expect(errors[0].message).toContain(
+    `The title does not match the required format`
   )
 })
 

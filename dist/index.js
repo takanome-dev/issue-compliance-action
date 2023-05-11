@@ -53,7 +53,7 @@ function checkTitle(title, issueTypes, charactersToExclude) {
             valid: false,
             errors: [
                 {
-                    message: `The title does not match the required format. The format must be one of the following: ${issueTypes.join(', ')}`
+                    message: `The title does not match the required format. The format must be one of the following: \n${issueTypes.join(`- \n`)}`
                 }
             ]
         };
@@ -64,7 +64,7 @@ function checkTitle(title, issueTypes, charactersToExclude) {
             valid: false,
             errors: [
                 {
-                    message: `The title cannot contain the following characters: ${charactersToExclude.join(', ')}`
+                    message: `The title cannot contain the following characters: \n${charactersToExclude.join(`- \n`)}`
                 }
             ]
         };
@@ -150,7 +150,7 @@ function run() {
             core.setOutput('title-check', titleCheck);
             const commentsToLeave = [];
             if (!prCompliant) {
-                core.setFailed(`This issue title should conform to the following format: ${filteredIssueTypes.map((type) => `\n- ${type}:`)}`);
+                core.setFailed(titleErrors.map(error => error.message).join('\n'));
                 const errorsComment = `\n\nLinting Errors\n${titleErrors
                     .map(error => `\n- ${error.message}`)
                     .join('')}`;
@@ -197,12 +197,18 @@ function updateReview(issue, body) {
             return;
         // if no existing review, body non blank, create a review
         if (comment === null && body !== '') {
-            yield client.rest.issues.createComment(Object.assign(Object.assign({}, issue), { body }));
+            yield Promise.all([
+                yield client.rest.issues.createComment(Object.assign(Object.assign({}, issue), { body })),
+                yield client.rest.issues.addLabels(Object.assign(Object.assign({}, issue), { labels: [':no_entry: invalid title'] }))
+            ]);
             return;
         }
         // if body blank and review exists, update it to show passed
         if (comment !== null && body === '') {
-            yield client.rest.issues.updateComment(Object.assign(Object.assign({}, issue), { comment_id: comment.id, body: 'Issue Compliance Checks Passed!' }));
+            yield Promise.all([
+                yield client.rest.issues.updateComment(Object.assign(Object.assign({}, issue), { comment_id: comment.id, body: 'Issue Compliance Checks Passed!' })),
+                yield client.rest.issues.removeLabel(Object.assign(Object.assign({}, issue), { name: ':no_entry: invalid title' }))
+            ]);
             return;
         }
         // if body non-blank and review exists, update it

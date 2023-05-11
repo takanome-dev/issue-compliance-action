@@ -49,13 +49,7 @@ async function run(): Promise<void> {
     const commentsToLeave = []
 
     if (!prCompliant) {
-      core
-        .setFailed(
-          `This issue title should conform to the following format: \n${filteredIssueTypes.map(
-            (type: any) => `\n- ${type}`
-          )}`
-        )
-        .join('')
+      core.setFailed(titleErrors.map(error => error.message).join('\n'))
 
       const errorsComment = `\n\nLinting Errors\n${titleErrors
         .map(error => `\n- ${error.message}`)

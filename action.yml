@@ -15,9 +15,9 @@ inputs:
     description: >
       Preamble portion to have on any comments made by the action. Because multiple checks are run, the action may have multiple sections to any generated comment.
     default: >
-      # Issue Compliance Checks
+      # Issue Compliance Checks :clipboard:
 
-      Thank you for filling this issue! We have run several checks on this issue in order
+      Thank you for opening this issue! We have run several checks on this issue in order
       to make sure it compliant with our contributing guidelines. Please review the checks
       below and make any necessary changes to this issue. Once all checks have passed, we
       will be able to triage this issue and take the next steps.
@@ -37,10 +37,9 @@ inputs:
     required: false
     description: Comment to leave on issue on failed check of the issue title
     default: >
-      ## Issue Title Format
+      ## Issue Title Format :pencil2:
 
-      In order to be considered for triage, the issue title must match the specification below.
-      Please update the title to match the specification in order for this check to pass.
+      In order to be considered for triage, the issue title must match the specification below:
   characters-to-exclude:
     required: false
     description: >
@@ -57,8 +56,7 @@ outputs:
   #   description: 'Result of check to ensure PR head is not protected branch.'
   title-check:
     description: Result of check to ensure the issue title is formatted correctly.
-  # watch-files-check:
-  #   description: 'Result of check for watched files having been modified. True if no modifications found to watched files.'
+
 runs:
   using: 'node16'
   main: 'dist/index.js'
