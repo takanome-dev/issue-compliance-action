@@ -37,9 +37,6 @@ const core = __importStar(__nccwpck_require__(7733));
 //   const bodyNoComments = body.replace(/<!--(.*?)-->/gms, '')
 //   return regex.test(bodyNoComments)
 // }
-// function checkBranch(branch: string, protectedBranch: string): boolean {
-//   return branch !== protectedBranch
-// }
 function escapeChecks(checkResult, message) {
     core.info(message);
     // core.setOutput('body-check', checkResult)

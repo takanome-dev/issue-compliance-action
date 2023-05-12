@@ -6,10 +6,6 @@ import * as core from '@actions/core'
 //   return regex.test(bodyNoComments)
 // }
 
-// function checkBranch(branch: string, protectedBranch: string): boolean {
-//   return branch !== protectedBranch
-// }
-
 export function escapeChecks(checkResult: boolean, message: string) {
   core.info(message)
   // core.setOutput('body-check', checkResult)

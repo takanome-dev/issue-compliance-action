@@ -94,7 +94,7 @@ jobs:
           base-comment: >
             # Issue Compliance Checks :clipboard:
 
-            Thank you for opening this issue! We have run several checks on this issue in order to make sure it compliant with our contributing guidelines. Please review the checks below and make any necessary changes to this issue. Once all checks have passed, we will be able to triage this issue and take the next steps.
+            Thank you for opening this issue! We have run several checks on this issue to ensure it complies with our contributing guidelines. Please review the statements below and make any necessary changes to this issue. Once all checks have passed, we will be able to triage this issue and take any necessary actions.
 ```
 
 ## ✏️ Contributing

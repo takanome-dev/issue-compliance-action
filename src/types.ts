@@ -28,7 +28,6 @@ export interface Issue {
   closed_at: string | null
   created_at: string
   updated_at: string
-  // closed_by: User;
   author_association: string
 }
 
@@ -110,8 +109,3 @@ export interface Comment {
   url: string
   user: User
 }
-
-// export interface GithubPayload extends WebhookPayload {
-//   issue?: Issue;
-//   comment?: Comment | undefined;
-// }
