@@ -1,6 +1,7 @@
 name: 'Issue Compliance Action'
 description: >
   Action to check issues for compliance on the title and required body infos
+
 branding:
   icon: check-circle
   color: green
@@ -14,14 +15,11 @@ inputs:
   base-comment:
     required: true
     description: >
-      Preamble portion to have on any comments made by the action. Because multiple checks are run, the action may have multiple sections to any generated comment.
+      A base comment to have on any comments made by the action. Because multiple checks are run, the action may have multiple sections to any generated comment.
     default: >
       # Issue Compliance Checks :clipboard:
 
-      Thank you for opening this issue! We have run several checks on this issue in order
-      to make sure it compliant with our contributing guidelines. Please review the checks
-      below and make any necessary changes to this issue. Once all checks have passed, we
-      will be able to triage this issue and take the next steps.
+      Thank you for opening this issue! We have run several checks on this issue to ensure it complies with our contributing guidelines. Please review the statements below and make any necessary changes to this issue. Once all checks have passed, we will be able to triage this issue and take any necessary actions.
   issue-template-types:
     required: true
     description: >
@@ -50,11 +48,8 @@ inputs:
       >
       #
       &
+
 outputs:
-  # body-check:
-  #   description: 'Result of match for PR Body against configured regex.'
-  # branch-check:
-  #   description: 'Result of check to ensure PR head is not protected branch.'
   title-check:
     description: Result of check to ensure the issue title is formatted correctly.
 

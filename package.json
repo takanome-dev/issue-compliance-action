@@ -1,6 +1,6 @@
 {
   "name": "issue-compliance-action",
-  "version": "0.1.0",
+  "version": "0.2",
   "private": true,
   "description": "An action to check if an issue is compliant with the issue template",
   "main": "lib/main.js",
@@ -24,15 +24,15 @@
   "keywords": [
     "actions",
     "node",
-    "setup"
+    "setup",
+    "compliance"
   ],
   "author": "takanome-dev <takanomedev221@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/github": "^5.1.1",
-    "@octokit/core": "^4.2.0",
-    "zod": "^3.21.4"
+    "@octokit/core": "^4.2.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.13",

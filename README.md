@@ -4,16 +4,15 @@
 <!-- <a href="https://codecov.io/gh/takanome-dev/issue-compliance-action"><img src="https://codecov.io/gh/takanome-dev/issue-compliance-action/branch/master/graph/badge.svg?token=MX3SB0GFB3" /></a> -->
 </p>
 
----
-
 This action is meant to help in managing issues. It will check for the following:
 
 - [x] Issue has a title
   - [x] Title starts with a valid issue type (e.g. bug, feature, chore)
   - [x] Title does not contain some characters (e.g. <,>,#)
+  - [x] Add a label `:no_entry: invalid title` if the title is invalid and remove it if it is valid
 - [ ] Issue has a description
   - [ ] Description should include all required information based on the issue template
-- [ ] Issue has a specific label maybe?
+- [ ] What else?
 
 This is a fork of [pr-compliance-action](https://github.com/mtfoley/pr-compliance-action) that is meant to be used with pull requests instead of issues.
 
@@ -36,7 +35,7 @@ jobs:
   pr-compliance:
     runs-on: ubuntu-latest
     steps:
-      - uses: takanome-dev/issue-compliance-action@0.1.0
+      - uses: takanome-dev/issue-compliance-action@v0.2
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
 ```
@@ -71,12 +70,11 @@ jobs:
   pr-compliance:
     runs-on: ubuntu-latest
     steps:
-      - uses: takanome-dev/issue-compliance-action@0.1.0
+      - uses: takanome-dev/issue-compliance-action@v0.2
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           title-check-enable: true
           # feel free to add more characters to exclude
-          # don't forget to scape certain characters
           characters-to-exclude: |
             <
             >
@@ -95,14 +93,13 @@ jobs:
           base-comment: >
             # Issue Compliance Checks :clipboard:
 
-            Thank you for opening this issue! We have run several checks on this issue in order to make sure it compliant with our contributing guidelines. Please review the checks below and make any necessary changes to this issue. Once all checks have passed, we will be able to triage this issue and take the next steps.
+            Thank you for opening this issue! We have run several checks on this issue to ensure it complies with our contributing guidelines. Please review the statements below and make any necessary changes to this issue. Once all checks have passed, we will be able to triage this issue and take any necessary actions.
 ```
 
 ## ✏️ Contributing
 
-We would love you to contribute to `takanome-dev/issue-compliance-action`, pull requests are welcome!
-Feel free to raise an issue for bugs, feature requests, or submit a pull request to help out.
+We would love you to contribute to `takanome-dev/issue-compliance-action`, pull requests are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
 
-## ⚖️ Licence
+## ⚖️ License
 
 The scripts and documentation in this project are released under the [MIT License](LICENSE)
