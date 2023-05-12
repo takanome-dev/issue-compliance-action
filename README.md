@@ -75,7 +75,6 @@ jobs:
           token: '${{ secrets.GITHUB_TOKEN }}'
           title-check-enable: true
           # feel free to add more characters to exclude
-          # don't forget to scape certain characters
           characters-to-exclude: |
             <
             >
