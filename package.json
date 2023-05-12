@@ -1,6 +1,6 @@
 {
   "name": "issue-compliance-action",
-  "version": "0.2.0",
+  "version": "0.2",
   "private": true,
   "description": "An action to check if an issue is compliant with the issue template",
   "main": "lib/main.js",

@@ -35,7 +35,7 @@ jobs:
   pr-compliance:
     runs-on: ubuntu-latest
     steps:
-      - uses: takanome-dev/issue-compliance-action@0.2.0
+      - uses: takanome-dev/issue-compliance-action@v0.2
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
 ```
@@ -70,7 +70,7 @@ jobs:
   pr-compliance:
     runs-on: ubuntu-latest
     steps:
-      - uses: takanome-dev/issue-compliance-action@0.2.0
+      - uses: takanome-dev/issue-compliance-action@v0.2
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           title-check-enable: true
