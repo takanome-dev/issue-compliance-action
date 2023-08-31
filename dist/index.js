@@ -37,15 +37,15 @@ function escapeChecks(checkResult, message) {
     core.setOutput('title-check', checkResult);
 }
 exports.escapeChecks = escapeChecks;
-function checkTitle(title, defaultIssueTitle, defaultIssueTitleComment, issue_templates_types, forbiddenCharacters) {
-    const regex1 = new RegExp(`^${issue_templates_types.join('|')}`, 'mi');
+function checkTitle(title, defaultIssueTitle, defaultIssueTitleComment, issueTypes, forbiddenCharacters) {
+    const regex1 = new RegExp(`^${issueTypes.join('|')}`, 'mi');
     if (!title || !regex1.test(title)) {
         return {
             valid: false,
             errors: [
                 {
                     message: `The title does not match the required format. It should start with one of the following: 
-           - ${issue_templates_types.join('\n - ')}
+           - ${issueTypes.join('\n - ')}
           Please update the title to allow the checks to pass.`
                 }
             ]
@@ -169,14 +169,14 @@ const repoToken = core.getInput('token');
 const label = core.getInput('label');
 const baseComment = core.getInput('base-comment');
 const titleComment = core.getInput('title-comment');
-const issueTemplatesTypes = core.getInput('issue-templates-types');
+const issueTemplateTypes = core.getInput('issue-templates-types');
 const titleCheckEnable = core.getBooleanInput('title-check-enable');
 const forbiddenCharacters = core.getInput('forbidden-characters');
 const defaultIssueTitle = core.getInput('default-title');
 const defaultIssueTitleComment = core.getInput('default-title-comment');
 const client = github.getOctokit(repoToken);
 function run() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ctx = github.context;
@@ -194,9 +194,18 @@ function run() {
             const title = (_j = (_h = ctx.payload.issue) === null || _h === void 0 ? void 0 : _h.title) !== null && _j !== void 0 ? _j : '';
             // eslint-disable-next-line no-console
             console.log({ author, body, title });
+            // TODO: remove any type assertion
+            const filteredIssueTypes = issueTemplateTypes
+                .split('\n')
+                .filter((x) => x !== '');
+            console.log({ issueTemplateTypes, filteredIssueTypes });
+            const filteredForbiddenCharacters = forbiddenCharacters
+                .split('\n')
+                .filter((x) => x !== '');
+            console.log({ forbiddenCharacters, filteredForbiddenCharacters });
             const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
                 ? { valid: true, errors: [] }
-                : (0, checks_1.checkTitle)(title, defaultIssueTitle !== null && defaultIssueTitle !== void 0 ? defaultIssueTitle : '', defaultIssueTitleComment !== null && defaultIssueTitleComment !== void 0 ? defaultIssueTitleComment : '', issueTemplatesTypes.split(','), (_k = forbiddenCharacters.split(',')) !== null && _k !== void 0 ? _k : []);
+                : (0, checks_1.checkTitle)(title, defaultIssueTitle !== null && defaultIssueTitle !== void 0 ? defaultIssueTitle : '', defaultIssueTitleComment !== null && defaultIssueTitleComment !== void 0 ? defaultIssueTitleComment : '', filteredIssueTypes, filteredForbiddenCharacters);
             const prCompliant = titleCheck;
             // eslint-disable-next-line no-console
             console.log({ prCompliant });
@@ -204,7 +213,8 @@ function run() {
             const commentsToLeave = [];
             if (!prCompliant) {
                 if (!titleCheck) {
-                    core.setFailed(`This issue title should conform to the following format: ${issueTemplatesTypes}`);
+                    core.setFailed(`This issue title should conform to the following format: ${issueTemplateTypes}`);
+                    core.setFailed(titleErrors.map(error => error.message).join('\n'));
                     const errorsComment = `\n\nLinting Errors\n${titleErrors
                         .map(error => `\n- ${error.message}`)
                         .join('')}`;

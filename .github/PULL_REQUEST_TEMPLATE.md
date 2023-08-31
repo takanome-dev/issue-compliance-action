@@ -1,10 +1,10 @@
 <!--
   For Work In Progress Pull Requests, please use the Draft PR feature,
   see https://github.blog/2019-02-14-introducing-draft-pull-requests/ for further details.
-  
+
   For a timely review/response, please avoid force-pushing additional
   commits if your PR already received reviews or comments.
-  
+
   Before submitting a Pull Request, please ensure you've done the following:
   - 📖 Read the Code of Conduct: https://github.com/mtfoley/pr-compliance-action/blob/HEAD/CODE_OF_CONDUCT.md.
   - 👷‍♀️ Create small PRs. In most cases, this will be possible.
@@ -27,18 +27,18 @@
 
 <!-- Please do not leave this blank -->
 
-
 ## Related Tickets & Documents
-<!-- 
+
+<!--
 Please use this format link issue numbers: Fixes #123
-https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword 
+https://docs.github.com/en/free-pro-team@latest/github/managing-your-work-on-github/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword
 -->
-This PR [adds/removes/fixes/resolves] this [feature/bug/etc]. 
+
+This PR [adds/removes/fixes/resolves] this [feature/bug/etc].
 
 ## Mobile & Desktop Screenshots/Recordings
 
 <!-- Visual changes require screenshots -->
-
 
 ## Added tests?
 
@@ -51,13 +51,6 @@ This PR [adds/removes/fixes/resolves] this [feature/bug/etc].
 - [ ] 📜 readme
 - [ ] 🙅 no documentation needed
 
-## [optional] Are there any post-deployment tasks we need to perform?
-
-
-
 ## [optional] What gif best describes this PR or how it makes you feel?
 
-
-
 <!-- note: PRs with deletes sections will be marked invalid -->
-

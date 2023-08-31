@@ -1,28 +1,33 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "issue-compliance-action",
+  "version": "0.2",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "An action to check if an issue is compliant with the issue template",
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts",
-    "lint": "eslint src/*.ts src/**/*.ts",
+    "lint": "eslint src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
-    "test": "vitest",
-    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "all": "npm run lint && npm run format && npm test && npm run build  && npm run package"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/takanome-dev/issue-compliance-action.git"
   },
+  "homepage": "https://github.com/takanome-dev/issue-compliance-action#readme",
+  "bugs": "https://github.com/takanome-dev/issue-compliance-action/issues",
   "keywords": [
     "actions",
     "node",
-    "setup"
+    "setup",
+    "compliance"
   ],
-  "author": "",
+  "author": "takanome-dev <takanomedev221@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.10.0",

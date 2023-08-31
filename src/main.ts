@@ -20,7 +20,7 @@ const repoToken = core.getInput('token')
 const label = core.getInput('label')
 const baseComment = core.getInput('base-comment')
 const titleComment = core.getInput('title-comment')
-const issueTemplatesTypes = core.getInput('issue-templates-types')
+const issueTemplateTypes = core.getInput('issue-templates-types')
 const titleCheckEnable = core.getBooleanInput('title-check-enable')
 const forbiddenCharacters = core.getInput('forbidden-characters')
 const defaultIssueTitle = core.getInput('default-title')
@@ -53,14 +53,27 @@ async function run(): Promise<void> {
     // eslint-disable-next-line no-console
     console.log({ author, body, title })
 
+    // TODO: remove any type assertion
+    const filteredIssueTypes = issueTemplateTypes
+      .split('\n')
+      .filter((x: string) => x !== '') as any[]
+
+    console.log({ issueTemplateTypes, filteredIssueTypes })
+
+    const filteredForbiddenCharacters = forbiddenCharacters
+      .split('\n')
+      .filter((x: string) => x !== '') as any[]
+
+    console.log({ forbiddenCharacters, filteredForbiddenCharacters })
+
     const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
       ? { valid: true, errors: [] }
       : checkTitle(
           title,
           defaultIssueTitle ?? '',
           defaultIssueTitleComment ?? '',
-          issueTemplatesTypes.split(','),
-          forbiddenCharacters.split(',') ?? []
+          filteredIssueTypes,
+          filteredForbiddenCharacters
         )
 
     const prCompliant = titleCheck
@@ -74,8 +87,9 @@ async function run(): Promise<void> {
     if (!prCompliant) {
       if (!titleCheck) {
         core.setFailed(
-          `This issue title should conform to the following format: ${issueTemplatesTypes}`
+          `This issue title should conform to the following format: ${issueTemplateTypes}`
         )
+        core.setFailed(titleErrors.map(error => error.message).join('\n'))
         const errorsComment = `\n\nLinting Errors\n${titleErrors
           .map(error => `\n- ${error.message}`)
           .join('')}`

@@ -9,10 +9,10 @@ export function checkTitle(
   title: string,
   defaultIssueTitle: string,
   defaultIssueTitleComment: string,
-  issue_templates_types: string[],
+  issueTypes: string[],
   forbiddenCharacters: string[]
 ) {
-  const regex1 = new RegExp(`^${issue_templates_types.join('|')}`, 'mi')
+  const regex1 = new RegExp(`^${issueTypes.join('|')}`, 'mi')
 
   if (!title || !regex1.test(title)) {
     return {
@@ -20,7 +20,7 @@ export function checkTitle(
       errors: [
         {
           message: `The title does not match the required format. It should start with one of the following: 
-           - ${issue_templates_types.join('\n - ')}
+           - ${issueTypes.join('\n - ')}
           Please update the title to allow the checks to pass.`
         }
       ]
