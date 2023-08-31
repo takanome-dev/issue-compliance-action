@@ -44,7 +44,9 @@ function checkTitle(title, defaultIssueTitle, defaultIssueTitleComment, issue_te
             valid: false,
             errors: [
                 {
-                    message: `The title does not match the required format. It should start with one of the following: ${issue_templates_types.join(', ')} . Please update the title to allow the check to pass.`
+                    message: `The title does not match the required format. It should start with one of the following: 
+           - ${issue_templates_types.join('\n - ')}
+          Please update the title to allow the checks to pass.`
                 }
             ]
         };
@@ -55,7 +57,7 @@ function checkTitle(title, defaultIssueTitle, defaultIssueTitleComment, issue_te
             valid: false,
             errors: [
                 {
-                    message: 'The title should have a space after the issue type and colon. Please add a space after the colon to allow the check to pass.'
+                    message: 'The title should have a space after the issue type and colon. Please add a space after the colon to allow the checks to pass.'
                 }
             ]
         };
@@ -66,7 +68,7 @@ function checkTitle(title, defaultIssueTitle, defaultIssueTitleComment, issue_te
             valid: false,
             errors: [
                 {
-                    message: `The title shouldn't have more than one space after the issue type. Please remove the extra space to allow the check to pass.`
+                    message: `The title shouldn't have more than one space after the issue type. Please remove the extra space to allow the checks to pass.`
                 }
             ]
         };
@@ -77,7 +79,7 @@ function checkTitle(title, defaultIssueTitle, defaultIssueTitleComment, issue_te
             valid: false,
             errors: [
                 {
-                    message: `The following characters are not allowed in the title: ${forbiddenCharacters.join(', ')}. Please remove them to allow the check to pass.`
+                    message: `The following characters are not allowed in the title: ${forbiddenCharacters.join(', ')}. Please remove them to allow the checks to pass.`
                 }
             ]
         };
@@ -164,6 +166,7 @@ const checks_1 = __nccwpck_require__(6455);
 //   state: string
 // }
 const repoToken = core.getInput('token');
+const label = core.getInput('label');
 const baseComment = core.getInput('base-comment');
 const titleComment = core.getInput('title-comment');
 const issueTemplatesTypes = core.getInput('issue-templates-types');
@@ -212,10 +215,16 @@ function run() {
                 let reviewBody = '';
                 if (commentsToLeave.length > 0)
                     reviewBody = [baseComment, ...commentsToLeave].join('\n\n');
-                yield updateReview({ owner: issue.owner, repo: issue.repo, issue_number: issue.number }, reviewBody);
+                yield Promise.allSettled([
+                    yield updateReview({ owner: issue.owner, repo: issue.repo, issue_number: issue.number }, reviewBody),
+                    yield labelIssue(prCompliant, { owner: issue.owner, repo: issue.repo, issue_number: issue.number }, label)
+                ]);
             }
             else {
-                yield updateReview({ owner: issue.owner, repo: issue.repo, issue_number: issue.number }, '');
+                yield Promise.allSettled([
+                    yield updateReview({ owner: issue.owner, repo: issue.repo, issue_number: issue.number }, ''),
+                    yield labelIssue(prCompliant, { owner: issue.owner, repo: issue.repo, issue_number: issue.number }, label)
+                ]);
             }
         }
         catch (error) {
@@ -262,6 +271,18 @@ function updateReview(issue, body) {
         // if body non-blank and review exists, update it
         if (comment !== null && body !== (comment === null || comment === void 0 ? void 0 : comment.body)) {
             yield client.rest.issues.updateComment(Object.assign(Object.assign({}, issue), { comment_id: comment.id, body }));
+            return;
+        }
+    });
+}
+function labelIssue(prCompliant, issue, label) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (prCompliant) {
+            yield client.rest.issues.removeLabel(Object.assign(Object.assign({}, issue), { name: label }));
+            return;
+        }
+        else {
+            yield client.rest.issues.addLabels(Object.assign(Object.assign({}, issue), { labels: [label] }));
             return;
         }
     });

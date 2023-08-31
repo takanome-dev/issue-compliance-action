@@ -19,9 +19,9 @@ export function checkTitle(
       valid: false,
       errors: [
         {
-          message: `The title does not match the required format. It should start with one of the following: ${issue_templates_types.join(
-            ', '
-          )} . Please update the title to allow the check to pass.`
+          message: `The title does not match the required format. It should start with one of the following: 
+           - ${issue_templates_types.join('\n - ')}
+          Please update the title to allow the checks to pass.`
         }
       ]
     }
@@ -35,7 +35,7 @@ export function checkTitle(
       errors: [
         {
           message:
-            'The title should have a space after the issue type and colon. Please add a space after the colon to allow the check to pass.'
+            'The title should have a space after the issue type and colon. Please add a space after the colon to allow the checks to pass.'
         }
       ]
     }
@@ -48,7 +48,7 @@ export function checkTitle(
       valid: false,
       errors: [
         {
-          message: `The title shouldn't have more than one space after the issue type. Please remove the extra space to allow the check to pass.`
+          message: `The title shouldn't have more than one space after the issue type. Please remove the extra space to allow the checks to pass.`
         }
       ]
     }
@@ -66,7 +66,7 @@ export function checkTitle(
         {
           message: `The following characters are not allowed in the title: ${forbiddenCharacters.join(
             ', '
-          )}. Please remove them to allow the check to pass.`
+          )}. Please remove them to allow the checks to pass.`
         }
       ]
     }

@@ -17,6 +17,7 @@ import { Comment } from './types'
 // }
 
 const repoToken = core.getInput('token')
+const label = core.getInput('label')
 const baseComment = core.getInput('base-comment')
 const titleComment = core.getInput('title-comment')
 const issueTemplatesTypes = core.getInput('issue-templates-types')
@@ -88,15 +89,29 @@ async function run(): Promise<void> {
 
       if (commentsToLeave.length > 0)
         reviewBody = [baseComment, ...commentsToLeave].join('\n\n')
-      await updateReview(
-        { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
-        reviewBody
-      )
+      await Promise.allSettled([
+        await updateReview(
+          { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
+          reviewBody
+        ),
+        await labelIssue(
+          prCompliant,
+          { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
+          label
+        )
+      ])
     } else {
-      await updateReview(
-        { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
-        ''
-      )
+      await Promise.allSettled([
+        await updateReview(
+          { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
+          ''
+        ),
+        await labelIssue(
+          prCompliant,
+          { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
+          label
+        )
+      ])
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
@@ -158,6 +173,26 @@ async function updateReview(
       ...issue,
       comment_id: comment.id,
       body
+    })
+    return
+  }
+}
+
+async function labelIssue(
+  prCompliant: boolean,
+  issue: { owner: string; repo: string; issue_number: number },
+  label: string
+) {
+  if (prCompliant) {
+    await client.rest.issues.removeLabel({
+      ...issue,
+      name: label
+    })
+    return
+  } else {
+    await client.rest.issues.addLabels({
+      ...issue,
+      labels: [label]
     })
     return
   }
