@@ -1,8 +1,9 @@
+/* eslint-disable no-console */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {context} from '@actions/github/lib/utils'
-import {checkTitle, escapeChecks} from './checks'
-import {Comment, Issue} from './types'
+import { context } from '@actions/github/lib/utils'
+import { checkTitle, escapeChecks } from './checks'
+import { Comment, Issue } from './types'
 
 // type PullRequestReview = {
 //   id: number
@@ -21,6 +22,9 @@ const baseComment = core.getInput('base-comment')
 const titleComment = core.getInput('title-comment')
 const issueTemplatesTypes = core.getInput('issue-templates-types')
 const titleCheckEnable = core.getBooleanInput('title-check-enable')
+const forbiddenCharacters = core.getInput('forbidden-characters')
+const defaultIssueTitle = core.getInput('default-title')
+const defaultIssueTitleComment = core.getInput('default-title-comment')
 const client = github.getOctokit(repoToken)
 
 async function run(): Promise<void> {
@@ -31,7 +35,7 @@ async function run(): Promise<void> {
 
     const isClosed =
       (ctx.payload.issue?.state ?? 'open').toLowerCase() === 'closed'
-    console.log({repoOwner, issue, isClosed})
+    console.log({ repoOwner, issue, isClosed })
 
     if (isClosed) {
       escapeChecks(
@@ -45,14 +49,20 @@ async function run(): Promise<void> {
     const body = ctx.payload.issue?.body ?? ''
     const title = ctx.payload.issue?.title ?? ''
 
-    console.log({author, body, title})
+    console.log({ author, body, title })
 
-    const {valid: titleCheck, errors: titleErrors} = !titleCheckEnable
-      ? {valid: true, errors: []}
-      : checkTitle(title, issueTemplatesTypes.split(','))
+    const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
+      ? { valid: true, errors: [] }
+      : checkTitle(
+          title,
+          defaultIssueTitle ?? '',
+          defaultIssueTitleComment ?? '',
+          issueTemplatesTypes.split(','),
+          forbiddenCharacters.split(',') ?? []
+        )
 
     const prCompliant = titleCheck
-    console.log({prCompliant})
+    console.log({ prCompliant })
 
     core.setOutput('title-check', titleCheck)
 
@@ -77,12 +87,12 @@ async function run(): Promise<void> {
       if (commentsToLeave.length > 0)
         reviewBody = [baseComment, ...commentsToLeave].join('\n\n')
       await updateReview(
-        {owner: issue.owner, repo: issue.repo, issue_number: issue.number},
+        { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
         reviewBody
       )
     } else {
       await updateReview(
-        {owner: issue.owner, repo: issue.repo, issue_number: issue.number},
+        { owner: issue.owner, repo: issue.repo, issue_number: issue.number },
         ''
       )
     }
@@ -97,12 +107,12 @@ async function findExistingComment(issue: {
   issue_number: number
 }): Promise<Comment | null> {
   let comment
-  const {data: comments} = await client.rest.issues.listComments({
+  const { data: comments } = await client.rest.issues.listComments({
     ...issue,
     per_page: 100
   })
 
-  console.log({comments})
+  console.log({ comments })
 
   comment = comments.find(innerComment => {
     return (innerComment?.user?.login ?? '') === 'github-actions[bot]'
@@ -114,7 +124,7 @@ async function findExistingComment(issue: {
 }
 
 async function updateReview(
-  issue: {owner: string; repo: string; issue_number: number},
+  issue: { owner: string; repo: string; issue_number: number },
   body: string
 ) {
   const comment = await findExistingComment(issue)

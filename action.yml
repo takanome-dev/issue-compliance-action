@@ -10,21 +10,17 @@ inputs:
     required: false
     description: Github token
     default: ${{ github.token }}
-  # ignore-authors:
-  #   required: true
-  #   description: >
-  #     PR Authors to ignore (e.g. dependabot). All checks will be skipped and action outputs will be
-  #     set to true if the PR has one of these authors.
-  #   default: |
-  #     dependabot
-  #     dependabot[bot]
-  # ignore-team-members:
-  #   required: true
-  #   description: >
-  #     Whether to ignore in the case that the PR author is a) the owner of repository, or b) has a
-  #     public membership in the org that owns the repository. If set to true and either of these
-  #     cases are satisfied, all checks will be skipped and action outputs will be set to true.
-  #   default: true
+  forbidden-characters:
+    required: true
+    description: >
+      Characters to forbid in the issue title. If the issue title contains any of these characters, the check will fail and the issue will be marked as invalid.
+    default: |
+      @
+      $
+      %
+      &
+      *
+      ;
   base-comment:
     required: true
     description: >
@@ -56,15 +52,22 @@ inputs:
 
       In order to be considered for triage, the issue title must match the specification below.
       Please update the title to match the specification in order for this check to pass.
+
+  default-title:
+    required: false
+    description: >
+      The default title to use for the issue. If the issue title matches this, the check will fail and the issue will be marked as invalid. This can also be used to check for a specific string in the issue title.
+    default: 'Issue Title'
+  default-title-comment:
+    required: false
+    description: Comment to leave on issue on failed check of the issue title. Note that `default-title` must be set for this to be used.
+    default: >
+      The title uses the default title for its template. Please edit it to mention the specific issue.
+
 outputs:
-  # body-check:
-  #   description: 'Result of match for PR Body against configured regex.'
-  # branch-check:
-  #   description: 'Result of check to ensure PR head is not protected branch.'
   title-check:
     description: Result of check to ensure the issue title is formatted correctly.
-  # watch-files-check:
-  #   description: 'Result of check for watched files having been modified. True if no modifications found to watched files.'
+
 runs:
   using: 'node18'
   main: 'dist/index.js'

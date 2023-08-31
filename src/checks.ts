@@ -1,41 +1,33 @@
 import * as core from '@actions/core'
 
-// function checkBody(body: string, regexString: string): boolean {
-//   const regex = new RegExp(regexString, 'mi')
-//   const bodyNoComments = body.replace(/<!--(.*?)-->/gms, '')
-//   return regex.test(bodyNoComments)
-// }
-
-// function checkBranch(branch: string, protectedBranch: string): boolean {
-//   return branch !== protectedBranch
-// }
-
 export function escapeChecks(checkResult: boolean, message: string) {
   core.info(message)
-  // core.setOutput('body-check', checkResult)
   core.setOutput('title-check', checkResult)
 }
 
-export function checkTitle(title: string, issue_templates_types: string[]) {
-  const regex1 = new RegExp(
-    `^(${issue_templates_types.join('|')})(:)(\\s)(\\w|\\s)+`,
-    'mi'
-  )
+export function checkTitle(
+  title: string,
+  defaultIssueTitle: string,
+  defaultIssueTitleComment: string,
+  issue_templates_types: string[],
+  forbiddenCharacters: string[]
+) {
+  const regex1 = new RegExp(`^${issue_templates_types.join('|')}`, 'mi')
 
-  if (!regex1.test(title)) {
+  if (!title || !regex1.test(title)) {
     return {
       valid: false,
       errors: [
         {
-          message: `Title does not match the required format. The format must be one of the following: ${issue_templates_types.join(
+          message: `The title does not match the required format. It should start with one of the following: ${issue_templates_types.join(
             ', '
-          )}`
+          )} . Please update the title to allow the check to pass.`
         }
       ]
     }
   }
 
-  const regex2 = new RegExp(`^(?!.*(<|>)).*`, 'mi')
+  const regex2 = new RegExp(/^(?=.*:\s).*$/, 'mi')
 
   if (!regex2.test(title)) {
     return {
@@ -43,11 +35,66 @@ export function checkTitle(title: string, issue_templates_types: string[]) {
       errors: [
         {
           message:
-            'Title cannot contain < or >. Removing these characters will allow the check to pass.'
+            'The title should have a space after the issue type and colon. Please add a space after the colon to allow the check to pass.'
         }
       ]
     }
   }
 
-  return {valid: true, errors: []}
+  const regex3 = new RegExp(/^.*:\s{1}[^\s].*$/, 'mi')
+
+  if (!regex3.test(title)) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message: `The title shouldn't have more than one space after the issue type. Please remove the extra space to allow the check to pass.`
+        }
+      ]
+    }
+  }
+
+  const regex4 = new RegExp(
+    `^(?!.*(\\s[${forbiddenCharacters.join('')}]))`,
+    'mi'
+  )
+
+  if (!regex4.test(title)) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message: `The following characters are not allowed in the title: ${forbiddenCharacters.join(
+            ', '
+          )}. Please remove them to allow the check to pass.`
+        }
+      ]
+    }
+  }
+
+  if (defaultIssueTitleComment && !defaultIssueTitle) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message: `Please set the "defaultIssueTitle" input in order to use the defaultIssueTitleComment.`
+        }
+      ]
+    }
+  }
+
+  const regex5 = new RegExp(`^${defaultIssueTitle}`, 'mi')
+
+  if (!regex5.test(title)) {
+    return {
+      valid: false,
+      errors: [
+        {
+          message: defaultIssueTitleComment
+        }
+      ]
+    }
+  }
+
+  return { valid: true, errors: [] }
 }
