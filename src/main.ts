@@ -1,9 +1,8 @@
-/* eslint-disable no-console */
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import { context } from '@actions/github/lib/utils'
 import { checkTitle, escapeChecks } from './checks'
-import { Comment, Issue } from './types'
+import { Comment } from './types'
 
 // type PullRequestReview = {
 //   id: number
@@ -35,6 +34,7 @@ async function run(): Promise<void> {
 
     const isClosed =
       (ctx.payload.issue?.state ?? 'open').toLowerCase() === 'closed'
+    // eslint-disable-next-line no-console
     console.log({ repoOwner, issue, isClosed })
 
     if (isClosed) {
@@ -49,6 +49,7 @@ async function run(): Promise<void> {
     const body = ctx.payload.issue?.body ?? ''
     const title = ctx.payload.issue?.title ?? ''
 
+    // eslint-disable-next-line no-console
     console.log({ author, body, title })
 
     const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
@@ -62,6 +63,7 @@ async function run(): Promise<void> {
         )
 
     const prCompliant = titleCheck
+    // eslint-disable-next-line no-console
     console.log({ prCompliant })
 
     core.setOutput('title-check', titleCheck)
@@ -112,6 +114,7 @@ async function findExistingComment(issue: {
     per_page: 100
   })
 
+  // eslint-disable-next-line no-console
   console.log({ comments })
 
   comment = comments.find(innerComment => {

@@ -69,5 +69,5 @@ outputs:
     description: Result of check to ensure the issue title is formatted correctly.
 
 runs:
-  using: 'node18'
+  using: 'node16'
   main: 'dist/index.js'
