@@ -28,6 +28,7 @@ export interface Issue {
   closed_at: string | null
   created_at: string
   updated_at: string
+  // closed_by: User;
   author_association: string
 }
 
@@ -108,4 +109,31 @@ export interface Comment {
   updated_at: string
   url: string
   user: User
+}
+
+// export interface GithubPayload extends WebhookPayload {
+//   issue?: Issue;
+//   comment?: Comment | undefined;
+// }
+
+export interface GithubPayload {
+  name: string
+  path: string
+  sha: string
+  size: number
+  url: string
+  html_url: string
+  git_url: string
+  download_url: string
+  type: string
+  _links: {
+    self: string
+    git: string
+    html: string
+  }
+}
+
+export interface GithubFile extends GithubPayload {
+  content: string
+  encoding: string
 }

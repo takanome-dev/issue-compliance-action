@@ -28,8 +28,10 @@
 
     // These rules do not match our code style
     "camelcase": "off",
+    "no-shadow": "off",
     "i18n-text/no-en": "off",
     "import/no-namespace": "off",
+    "prettier/prettier": "off",
     "no-console": "warn"
   }
 }

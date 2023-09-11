@@ -5,49 +5,41 @@ description: >
 branding:
   icon: check-circle
   color: green
-author: 'TAKANOME DEV'
+author: 'El Hadji Malick Seck'
 
 inputs:
   token:
     required: false
     description: Github token
     default: ${{ github.token }}
+  label:
+    required: true
+    description: Label to add to issue if it is invalid
+    default: '🙅 invalid'
+  forbidden-characters:
+    required: false
+    description: >
+      Characters to forbid in the issue title. If the issue title contains any of these characters, the check will fail and the issue will be marked as invalid.
+    default: ''
   base-comment:
     required: true
     description: >
-      A base comment to have on any comments made by the action. Because multiple checks are run, the action may have multiple sections to any generated comment.
+      Preamble portion to have on any comments made by the action. Because multiple checks are run, the action may have multiple sections to any generated comment.
     default: >
-      # Issue Compliance Checks :clipboard:
+      # Issue Compliance Checks
 
-      Thank you for opening this issue! We have run several checks on this issue to ensure it complies with our contributing guidelines. Please review the statements below and make any necessary changes to this issue. Once all checks have passed, we will be able to triage this issue and take any necessary actions.
-  issue-template-types:
-    required: true
-    description: >
-      The types of issue templates to check against. If the issue does not have one of these templates, the check will fail and the issue will be marked as invalid.
-    default: |
-      Feature Request
-      Bug Report
-      Question
-  title-check-enable:
-    required: true
-    description: Whether or not to lint the issue title
-    default: true
+      Thank you for filling this issue! We have run several checks on this issue in order
+      to make sure it compliant with our contributing guidelines. Please review the checks
+      below and make any necessary changes to this issue. Once all checks have passed, we
+      will be able to triage this issue and take the next steps.
   title-comment:
-    required: false
+    required: true
     description: Comment to leave on issue on failed check of the issue title
     default: >
-      ## Issue Title Format :pencil2:
+      ## Issue Title Format
 
-      In order for this issue to be considered for triage, the issue title must match the specification below:
-  characters-to-exclude:
-    required: false
-    description: >
-      Characters to exclude from the issue title. If the issue title contains any of these characters, the check will fail and the issue will be marked as invalid.
-    default: |
-      <
-      >
-      #
-      &
+      In order to be considered for triage, the issue title must match the specification below.
+      Please update the title to match the specification in order for this check to pass.
 
 outputs:
   title-check:
