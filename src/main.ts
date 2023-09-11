@@ -89,7 +89,7 @@ async function run(): Promise<void> {
     // eslint-disable-next-line no-console
     console.log({ author, body, title })
 
-    getIssueTemplateTitles()
+    await getIssueTemplateTitles()
 
     // TODO: remove any type assertion
     const filteredIssueTypes = issueTemplateTypes
