@@ -31,21 +31,30 @@ const client = github.getOctokit(repoToken)
 
 // import * as core from '@actions/core';
 // import * as github from '@actions/github';
+interface Repo {
+  owner: string
+  repo: string
+}
 
-async function getIssueTemplateTitles() {
-  const octokit = github.getOctokit(core.getInput('github-token'))
-  const { owner, repo } = github.context.repo
+async function getIssueTemplateTitles(octokit: typeof client, ghRepo: Repo) {
+  const { owner, repo } = ghRepo
 
-  // Get the contents of the .github/ISSUE_TEMPLATE directory
-  const response = await octokit.rest.repos.getContent({
-    owner,
-    repo,
-    path: '.github/ISSUE_TEMPLATE'
-  })
+  try {
+    // Get the contents of the .github/ISSUE_TEMPLATE directory
+    const response = await octokit.rest.repos.getContent({
+      owner,
+      repo,
+      path: '.github/ISSUE_TEMPLATE'
+    })
 
-  console.log('--------------------------------------------')
-  console.log(JSON.stringify(response.data, null, 2))
-  console.log('--------------------------------------------')
+    console.log('--------------------------------------------')
+    console.log(JSON.stringify(response.data, null, 2))
+    console.log('--------------------------------------------')
+  } catch (error) {
+    console.log('--------------------------------------------')
+    console.log(error)
+    console.log('--------------------------------------------')
+  }
 
   // Extract the issue title from each file
   // const titles = response.data
@@ -89,7 +98,10 @@ async function run(): Promise<void> {
     // eslint-disable-next-line no-console
     console.log({ author, body, title })
 
-    await getIssueTemplateTitles()
+    await getIssueTemplateTitles(client, {
+      owner: issue.owner,
+      repo: issue.repo
+    })
 
     // TODO: remove any type assertion
     const filteredIssueTypes = issueTemplateTypes
