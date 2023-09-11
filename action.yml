@@ -17,16 +17,10 @@ inputs:
     description: Label to add to issue if it is invalid
     default: '🙅 invalid'
   forbidden-characters:
-    required: true
+    required: false
     description: >
       Characters to forbid in the issue title. If the issue title contains any of these characters, the check will fail and the issue will be marked as invalid.
-    default: |
-      @
-      $
-      %
-      &
-      *
-      ;
+    default: ''
   base-comment:
     required: true
     description: >
@@ -38,18 +32,6 @@ inputs:
       to make sure it compliant with our contributing guidelines. Please review the checks
       below and make any necessary changes to this issue. Once all checks have passed, we
       will be able to triage this issue and take the next steps.
-  issue-template-types:
-    required: true
-    description: >
-      The types of issue templates to check against. If the issue does not have one of these templates, the check will fail and the issue will be marked as invalid.
-    default: |
-      Feature Request
-      Bug Report
-      Question
-  title-check-enable:
-    required: true
-    description: Whether or not to lint the issue title
-    default: true
   title-comment:
     required: true
     description: Comment to leave on issue on failed check of the issue title
@@ -58,17 +40,6 @@ inputs:
 
       In order to be considered for triage, the issue title must match the specification below.
       Please update the title to match the specification in order for this check to pass.
-
-  # default-title:
-  #   required: false
-  #   description: >
-  #     The default title to use for the issue. If the issue title matches this, the check will fail and the issue will be marked as invalid. This can also be used to check for a specific string in the issue title.
-  #   default: 'Issue Title'
-  # default-title-comment:
-  #   required: false
-  #   description: Comment to leave on issue on failed check of the issue title. Note that `default-title` must be set for this to be used.
-  #   default: >
-  #     The title uses the default title for its template. Please edit it to mention the specific issue.
 
 outputs:
   title-check:

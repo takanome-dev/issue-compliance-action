@@ -3,34 +3,16 @@ import * as github from '@actions/github'
 import * as yaml from 'js-yaml'
 import { context } from '@actions/github/lib/utils'
 
-import { checkTitle, escapeChecks } from './checks'
+import { escapeChecks } from './checks'
 import { Comment, GithubFile, GithubPayload } from './types'
-
-// type PullRequestReview = {
-//   id: number
-//   node_id: string
-//   user: {
-//     login: string
-//     id: number
-//     node_id: string
-//   } | null
-//   body: string
-//   state: string
-// }
 
 const repoToken = core.getInput('token')
 const label = core.getInput('label')
 const baseComment = core.getInput('base-comment')
 const titleComment = core.getInput('title-comment')
-const issueTemplateTypes = core.getInput('issue-templates-types')
-const titleCheckEnable = core.getBooleanInput('title-check-enable')
 const forbiddenCharacters = core.getInput('forbidden-characters')
-// const defaultIssueTitle = core.getInput('default-title')
-// const defaultIssueTitleComment = core.getInput('default-title-comment')
 const client = github.getOctokit(repoToken)
 
-// import * as core from '@actions/core';
-// import * as github from '@actions/github';
 interface Repo {
   owner: string
   repo: string
@@ -70,15 +52,7 @@ async function getIssueTemplateTitles(
         Buffer.from(fileContent.content, 'base64').toString()
       )
 
-      console.log(
-        '---------------------------------------- FILE TEMPLATE -----------------------'
-      )
-      console.log(JSON.stringify(template, null, 2))
-      console.log(
-        '---------------------------------------- FILE TEMPLATE -----------------------'
-      )
       return (template as any).title.trim()
-      // return template.title.split(':')[0].trim()
     })
 
   return Promise.all(titles)
@@ -89,6 +63,9 @@ async function run(): Promise<void> {
     const ctx = github.context
     const issue = ctx.issue
     const repoOwner = context.repo.owner
+
+    const errors = []
+    let message = ''
 
     const isClosed =
       (ctx.payload.issue?.state ?? 'open').toLowerCase() === 'closed'
@@ -117,42 +94,68 @@ async function run(): Promise<void> {
 
     console.log({ titles })
 
-    // const issueTemplateTitles = titles?.join('\n')
+    const issueTemplateTypes = titles.map(t => t.split(':')[0])
 
-    // if (issueTemplateTitles.con)
-    // TODO: remove any type assertion
-    const filteredIssueTypes = issueTemplateTypes
-      .split('\n')
-      .filter((x: string) => x !== '') as any[]
+    const regex1 = new RegExp(`^${issueTemplateTypes.join('|')}`, 'mi')
 
-    console.log({ issueTemplateTypes, filteredIssueTypes })
+    if (!title || !regex1.test(title)) {
+      message = `The title does not match the required format. It should start with one of the following:
+        - ${issueTemplateTypes.join('\n - ')}`
+      errors.push(message)
+    }
+
+    if (titles.includes(title)) {
+      message = `The title should not be the same as the issue template title.`
+      errors.push(message)
+    }
+
+    const regex2 = new RegExp(/^(?=.*:\s).*$/, 'mi')
+
+    if (!regex2.test(title)) {
+      message = 'The title should have a space after the issue type and colon'
+      errors.push(message)
+    }
+
+    const regex3 = new RegExp(/^.*:\s{1}[^\s].*$/, 'mi')
+
+    if (!regex3.test(title)) {
+      message = `The title shouldn't have more than one space after the issue type`
+      errors.push(message)
+    }
 
     const filteredForbiddenCharacters = forbiddenCharacters
       .split('\n')
       .filter((x: string) => x !== '') as any[]
 
-    console.log({ forbiddenCharacters, filteredForbiddenCharacters })
+    const regex4 = new RegExp(
+      `^(?!.*(\\s[${filteredForbiddenCharacters.join('')}]))`,
+      'mi'
+    )
 
-    const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
-      ? { valid: true, errors: [] }
-      : checkTitle(title, filteredIssueTypes, filteredForbiddenCharacters)
+    if (!regex4.test(title)) {
+      message = `The following characters are not allowed in the title: ${filteredForbiddenCharacters.join(
+        ', '
+      )}`
+      errors.push(message)
+    }
 
-    const prCompliant = titleCheck
+    const prCompliant = errors.length === 0
     // eslint-disable-next-line no-console
-    console.log({ prCompliant })
+    console.log({ prCompliant, errors })
 
-    core.setOutput('title-check', titleCheck)
+    core.setOutput('title-check', prCompliant)
 
     const commentsToLeave = []
 
     if (!prCompliant) {
-      if (!titleCheck) {
+      if (errors.length > 0) {
         core.setFailed(
-          `This issue title should conform to the following format: ${issueTemplateTypes}`
+          `This issue title should conform to the issue template. Please update the title to allow the checks to pass.`
         )
-        core.setFailed(titleErrors.map(error => error.message).join('\n'))
-        const errorsComment = `\n\nLinting Errors\n${titleErrors
-          .map(error => `\n- ${error.message}`)
+        core.setFailed(errors.map(error => error).join('\n'))
+
+        const errorsComment = `\n\nLinting Errors\n${errors
+          .map(error => `\n- ${error}`)
           .join('')}`
 
         if (titleComment !== '')

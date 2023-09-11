@@ -5,6 +5,7 @@ export function escapeChecks(checkResult: boolean, message: string) {
   core.setOutput('title-check', checkResult)
 }
 
+// TODO: remove this function and the tests
 export function checkTitle(
   title: string,
   issueTypes: string[],
