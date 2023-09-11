@@ -1,6 +1,8 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+// import * as yaml from 'js-yaml';
 import { context } from '@actions/github/lib/utils'
+
 import { checkTitle, escapeChecks } from './checks'
 import { Comment } from './types'
 
@@ -27,6 +29,40 @@ const defaultIssueTitle = core.getInput('default-title')
 const defaultIssueTitleComment = core.getInput('default-title-comment')
 const client = github.getOctokit(repoToken)
 
+// import * as core from '@actions/core';
+// import * as github from '@actions/github';
+
+async function getIssueTemplateTitles() {
+  const octokit = github.getOctokit(core.getInput('github-token'))
+  const { owner, repo } = github.context.repo
+
+  // Get the contents of the .github/ISSUE_TEMPLATE directory
+  const response = await octokit.rest.repos.getContent({
+    owner,
+    repo,
+    path: '.github/ISSUE_TEMPLATE'
+  })
+
+  console.log('--------------------------------------------')
+  console.log(JSON.stringify(response.data, null, 2))
+  console.log('--------------------------------------------')
+
+  // Extract the issue title from each file
+  // const titles = response.data
+  //   .filter(file => file.type === 'file' && file.name.endsWith('.md'))
+  //   .map(async file => {
+  //     const content = await octokit.rest.repos.getContent({
+  //       owner,
+  //       repo,
+  //       path: file.path
+  //     });
+  //     const template = yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
+  //     return template.title.split(':')[0].trim();
+  //   });
+
+  // return Promise.all(titles);
+}
+
 async function run(): Promise<void> {
   try {
     const ctx = github.context
@@ -52,6 +88,8 @@ async function run(): Promise<void> {
 
     // eslint-disable-next-line no-console
     console.log({ author, body, title })
+
+    getIssueTemplateTitles()
 
     // TODO: remove any type assertion
     const filteredIssueTypes = issueTemplateTypes
