@@ -186,28 +186,30 @@ function getIssueTemplateTitles(octokit, ghRepo) {
                 repo,
                 path: '.github/ISSUE_TEMPLATE'
             });
-            console.log('--------------------------------------------');
-            console.log(JSON.stringify(response.data, null, 2));
-            console.log('--------------------------------------------');
+            const data = response.data;
+            // Extract the issue title from each file
+            const titles = data
+                .filter(file => (file.type === 'file' && file.name.endsWith('.yml')) ||
+                file.name.endsWith('.yaml'))
+                .map((file) => __awaiter(this, void 0, void 0, function* () {
+                const content = yield octokit.rest.repos.getContent({
+                    owner,
+                    repo,
+                    path: file.path
+                });
+                console.log('-------------------------------------------- FILE CONTENT -------------------------------');
+                console.log(JSON.stringify(content.data, null, 2));
+                console.log('-------------------------------------------- FILE CONTENT -------------------------------');
+                // const template = yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
+                // return template.title.split(':')[0].trim();
+            }));
+            return Promise.all(titles);
         }
         catch (error) {
-            console.log('--------------------------------------------');
+            console.log('-------------------------------------------- ERROR -------------------------------');
             console.log(error);
-            console.log('--------------------------------------------');
+            console.log('-------------------------------------------- ERROR -------------------------------');
         }
-        // Extract the issue title from each file
-        // const titles = response.data
-        //   .filter(file => file.type === 'file' && file.name.endsWith('.md'))
-        //   .map(async file => {
-        //     const content = await octokit.rest.repos.getContent({
-        //       owner,
-        //       repo,
-        //       path: file.path
-        //     });
-        //     const template = yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
-        //     return template.title.split(':')[0].trim();
-        //   });
-        // return Promise.all(titles);
     });
 }
 function run() {

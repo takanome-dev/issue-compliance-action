@@ -4,7 +4,7 @@ import * as github from '@actions/github'
 import { context } from '@actions/github/lib/utils'
 
 import { checkTitle, escapeChecks } from './checks'
-import { Comment } from './types'
+import { Comment, GithubPayload } from './types'
 
 // type PullRequestReview = {
 //   id: number
@@ -47,29 +47,43 @@ async function getIssueTemplateTitles(octokit: typeof client, ghRepo: Repo) {
       path: '.github/ISSUE_TEMPLATE'
     })
 
-    console.log('--------------------------------------------')
-    console.log(JSON.stringify(response.data, null, 2))
-    console.log('--------------------------------------------')
+    const data = response.data as GithubPayload[]
+
+    // Extract the issue title from each file
+    const titles = data
+      .filter(
+        file =>
+          (file.type === 'file' && file.name.endsWith('.yml')) ||
+          file.name.endsWith('.yaml')
+      )
+      .map(async file => {
+        const content = await octokit.rest.repos.getContent({
+          owner,
+          repo,
+          path: file.path
+        })
+
+        console.log(
+          '-------------------------------------------- FILE CONTENT -------------------------------'
+        )
+        console.log(JSON.stringify(content.data, null, 2))
+        console.log(
+          '-------------------------------------------- FILE CONTENT -------------------------------'
+        )
+        // const template = yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
+        // return template.title.split(':')[0].trim();
+      })
+
+    return Promise.all(titles)
   } catch (error) {
-    console.log('--------------------------------------------')
+    console.log(
+      '-------------------------------------------- ERROR -------------------------------'
+    )
     console.log(error)
-    console.log('--------------------------------------------')
+    console.log(
+      '-------------------------------------------- ERROR -------------------------------'
+    )
   }
-
-  // Extract the issue title from each file
-  // const titles = response.data
-  //   .filter(file => file.type === 'file' && file.name.endsWith('.md'))
-  //   .map(async file => {
-  //     const content = await octokit.rest.repos.getContent({
-  //       owner,
-  //       repo,
-  //       path: file.path
-  //     });
-  //     const template = yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
-  //     return template.title.split(':')[0].trim();
-  //   });
-
-  // return Promise.all(titles);
 }
 
 async function run(): Promise<void> {
