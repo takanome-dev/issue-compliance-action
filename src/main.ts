@@ -1,7 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import * as yaml from 'js-yaml'
-import { context } from '@actions/github/lib/utils'
 
 import { escapeChecks } from './checks'
 import { Comment, GithubFile, GithubPayload } from './types'
@@ -62,15 +61,12 @@ async function run(): Promise<void> {
   try {
     const ctx = github.context
     const issue = ctx.issue
-    const repoOwner = context.repo.owner
 
     const errors = []
     let message = ''
 
     const isClosed =
       (ctx.payload.issue?.state ?? 'open').toLowerCase() === 'closed'
-    // eslint-disable-next-line no-console
-    console.log({ repoOwner, issue, isClosed })
 
     if (isClosed) {
       escapeChecks(
@@ -80,19 +76,12 @@ async function run(): Promise<void> {
       return
     }
 
-    const author = ctx.payload.issue?.user?.login ?? ''
-    const body = ctx.payload.issue?.body ?? ''
-    const title = ctx.payload.issue?.title ?? ''
-
-    // eslint-disable-next-line no-console
-    console.log({ author, body, title })
+    const title = (ctx.payload.issue?.title ?? '') as string
 
     const titles = await getIssueTemplateTitles(client, {
       owner: issue.owner,
       repo: issue.repo
     })
-
-    console.log({ titles })
 
     const issueTemplateTypes = titles.map(t => t.split(':')[0])
 
@@ -104,8 +93,9 @@ async function run(): Promise<void> {
       errors.push(message)
     }
 
-    if (titles.includes(title)) {
-      message = `The title should not be the same as the issue template title.`
+    if (titles.some(t => title.includes(t))) {
+      // message = `The title should not be the same as the issue template title.`
+      message = `The title should not be the same or should not contain the issue template title.`
       errors.push(message)
     }
 
@@ -140,8 +130,6 @@ async function run(): Promise<void> {
     }
 
     const prCompliant = errors.length === 0
-    // eslint-disable-next-line no-console
-    console.log({ prCompliant, errors })
 
     core.setOutput('title-check', prCompliant)
 
@@ -207,15 +195,11 @@ async function findExistingComment(issue: {
     per_page: 100
   })
 
-  // eslint-disable-next-line no-console
-  console.log({ comments })
-
   comment = comments.find(innerComment => {
     return (innerComment?.user?.login ?? '') === 'github-actions[bot]'
   })
 
   if (comment === undefined) comment = null
-  // TODO: remove this type assertion
   return comment as Comment
 }
 

@@ -154,7 +154,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const yaml = __importStar(__nccwpck_require__(1917));
-const utils_1 = __nccwpck_require__(3030);
 const checks_1 = __nccwpck_require__(2321);
 const repoToken = core.getInput('token');
 const label = core.getInput('label');
@@ -190,31 +189,23 @@ function getIssueTemplateTitles(octokit, ghRepo) {
     });
 }
 function run() {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const ctx = github.context;
             const issue = ctx.issue;
-            const repoOwner = utils_1.context.repo.owner;
             const errors = [];
             let message = '';
             const isClosed = ((_b = (_a = ctx.payload.issue) === null || _a === void 0 ? void 0 : _a.state) !== null && _b !== void 0 ? _b : 'open').toLowerCase() === 'closed';
-            // eslint-disable-next-line no-console
-            console.log({ repoOwner, issue, isClosed });
             if (isClosed) {
                 (0, checks_1.escapeChecks)(false, 'The issue is closed, skipping checks, setting all outputs to false.');
                 return;
             }
-            const author = (_e = (_d = (_c = ctx.payload.issue) === null || _c === void 0 ? void 0 : _c.user) === null || _d === void 0 ? void 0 : _d.login) !== null && _e !== void 0 ? _e : '';
-            const body = (_g = (_f = ctx.payload.issue) === null || _f === void 0 ? void 0 : _f.body) !== null && _g !== void 0 ? _g : '';
-            const title = (_j = (_h = ctx.payload.issue) === null || _h === void 0 ? void 0 : _h.title) !== null && _j !== void 0 ? _j : '';
-            // eslint-disable-next-line no-console
-            console.log({ author, body, title });
+            const title = ((_d = (_c = ctx.payload.issue) === null || _c === void 0 ? void 0 : _c.title) !== null && _d !== void 0 ? _d : '');
             const titles = yield getIssueTemplateTitles(client, {
                 owner: issue.owner,
                 repo: issue.repo
             });
-            console.log({ titles });
             const issueTemplateTypes = titles.map(t => t.split(':')[0]);
             const regex1 = new RegExp(`^${issueTemplateTypes.join('|')}`, 'mi');
             if (!title || !regex1.test(title)) {
@@ -222,8 +213,9 @@ function run() {
         - ${issueTemplateTypes.join('\n - ')}`;
                 errors.push(message);
             }
-            if (titles.includes(title)) {
-                message = `The title should not be the same as the issue template title.`;
+            if (titles.some(t => title.includes(t))) {
+                // message = `The title should not be the same as the issue template title.`
+                message = `The title should not be the same or should not contain the issue template title.`;
                 errors.push(message);
             }
             const regex2 = new RegExp(/^(?=.*:\s).*$/, 'mi');
@@ -245,8 +237,6 @@ function run() {
                 errors.push(message);
             }
             const prCompliant = errors.length === 0;
-            // eslint-disable-next-line no-console
-            console.log({ prCompliant, errors });
             core.setOutput('title-check', prCompliant);
             const commentsToLeave = [];
             if (!prCompliant) {
@@ -285,15 +275,12 @@ function findExistingComment(issue) {
     return __awaiter(this, void 0, void 0, function* () {
         let comment;
         const { data: comments } = yield client.rest.issues.listComments(Object.assign(Object.assign({}, issue), { per_page: 100 }));
-        // eslint-disable-next-line no-console
-        console.log({ comments });
         comment = comments.find(innerComment => {
             var _a, _b;
             return ((_b = (_a = innerComment === null || innerComment === void 0 ? void 0 : innerComment.user) === null || _a === void 0 ? void 0 : _a.login) !== null && _b !== void 0 ? _b : '') === 'github-actions[bot]';
         });
         if (comment === undefined)
             comment = null;
-        // TODO: remove this type assertion
         return comment;
     });
 }
