@@ -1,10 +1,10 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-// import * as yaml from 'js-yaml';
+import * as yaml from 'js-yaml'
 import { context } from '@actions/github/lib/utils'
 
 import { checkTitle, escapeChecks } from './checks'
-import { Comment, GithubPayload } from './types'
+import { Comment, GithubFile, GithubPayload } from './types'
 
 // type PullRequestReview = {
 //   id: number
@@ -25,8 +25,8 @@ const titleComment = core.getInput('title-comment')
 const issueTemplateTypes = core.getInput('issue-templates-types')
 const titleCheckEnable = core.getBooleanInput('title-check-enable')
 const forbiddenCharacters = core.getInput('forbidden-characters')
-const defaultIssueTitle = core.getInput('default-title')
-const defaultIssueTitleComment = core.getInput('default-title-comment')
+// const defaultIssueTitle = core.getInput('default-title')
+// const defaultIssueTitleComment = core.getInput('default-title-comment')
 const client = github.getOctokit(repoToken)
 
 // import * as core from '@actions/core';
@@ -36,54 +36,52 @@ interface Repo {
   repo: string
 }
 
-async function getIssueTemplateTitles(octokit: typeof client, ghRepo: Repo) {
+async function getIssueTemplateTitles(
+  octokit: typeof client,
+  ghRepo: Repo
+): Promise<string[]> {
   const { owner, repo } = ghRepo
 
-  try {
-    // Get the contents of the .github/ISSUE_TEMPLATE directory
-    const response = await octokit.rest.repos.getContent({
-      owner,
-      repo,
-      path: '.github/ISSUE_TEMPLATE'
-    })
+  // Get the contents of the .github/ISSUE_TEMPLATE directory
+  const response = await octokit.rest.repos.getContent({
+    owner,
+    repo,
+    path: '.github/ISSUE_TEMPLATE'
+  })
 
-    const data = response.data as GithubPayload[]
+  const data = response.data as GithubPayload[]
 
-    // Extract the issue title from each file
-    const titles = data
-      .filter(
-        file =>
-          (file.type === 'file' && file.name.endsWith('.yml')) ||
-          file.name.endsWith('.yaml')
-      )
-      .map(async file => {
-        const content = await octokit.rest.repos.getContent({
-          owner,
-          repo,
-          path: file.path
-        })
-
-        console.log(
-          '-------------------------------------------- FILE CONTENT -------------------------------'
-        )
-        console.log(JSON.stringify(content.data, null, 2))
-        console.log(
-          '-------------------------------------------- FILE CONTENT -------------------------------'
-        )
-        // const template = yaml.safeLoad(Buffer.from(content.data.content, 'base64').toString());
-        // return template.title.split(':')[0].trim();
+  // Extract the issue title from each file
+  const titles = data
+    .filter(
+      file =>
+        (file.type === 'file' && file.name.endsWith('.yml')) ||
+        file.name.endsWith('.yaml')
+    )
+    .map(async file => {
+      const content = await octokit.rest.repos.getContent({
+        owner,
+        repo,
+        path: file.path
       })
 
-    return Promise.all(titles)
-  } catch (error) {
-    console.log(
-      '-------------------------------------------- ERROR -------------------------------'
-    )
-    console.log(error)
-    console.log(
-      '-------------------------------------------- ERROR -------------------------------'
-    )
-  }
+      const fileContent = content.data as GithubFile
+      const template = yaml.load(
+        Buffer.from(fileContent.content, 'base64').toString()
+      )
+
+      console.log(
+        '---------------------------------------- FILE TEMPLATE -----------------------'
+      )
+      console.log(JSON.stringify(template, null, 2))
+      console.log(
+        '---------------------------------------- FILE TEMPLATE -----------------------'
+      )
+      return (template as any).title.trim()
+      // return template.title.split(':')[0].trim()
+    })
+
+  return Promise.all(titles)
 }
 
 async function run(): Promise<void> {
@@ -112,11 +110,16 @@ async function run(): Promise<void> {
     // eslint-disable-next-line no-console
     console.log({ author, body, title })
 
-    await getIssueTemplateTitles(client, {
+    const titles = await getIssueTemplateTitles(client, {
       owner: issue.owner,
       repo: issue.repo
     })
 
+    console.log({ titles })
+
+    // const issueTemplateTitles = titles?.join('\n')
+
+    // if (issueTemplateTitles.con)
     // TODO: remove any type assertion
     const filteredIssueTypes = issueTemplateTypes
       .split('\n')
@@ -132,13 +135,7 @@ async function run(): Promise<void> {
 
     const { valid: titleCheck, errors: titleErrors } = !titleCheckEnable
       ? { valid: true, errors: [] }
-      : checkTitle(
-          title,
-          defaultIssueTitle ?? '',
-          defaultIssueTitleComment ?? '',
-          filteredIssueTypes,
-          filteredForbiddenCharacters
-        )
+      : checkTitle(title, filteredIssueTypes, filteredForbiddenCharacters)
 
     const prCompliant = titleCheck
     // eslint-disable-next-line no-console

@@ -132,3 +132,8 @@ export interface GithubPayload {
     html: string
   }
 }
+
+export interface GithubFile extends GithubPayload {
+  content: string
+  encoding: string
+}

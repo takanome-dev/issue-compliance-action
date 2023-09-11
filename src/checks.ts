@@ -7,8 +7,6 @@ export function escapeChecks(checkResult: boolean, message: string) {
 
 export function checkTitle(
   title: string,
-  defaultIssueTitle: string,
-  defaultIssueTitleComment: string,
   issueTypes: string[],
   forbiddenCharacters: string[]
 ) {
@@ -72,29 +70,29 @@ export function checkTitle(
     }
   }
 
-  if (defaultIssueTitleComment && !defaultIssueTitle) {
-    return {
-      valid: false,
-      errors: [
-        {
-          message: `Please set the "defaultIssueTitle" input in order to use the defaultIssueTitleComment.`
-        }
-      ]
-    }
-  }
+  // if (defaultIssueTitleComment && !defaultIssueTitle) {
+  //   return {
+  //     valid: false,
+  //     errors: [
+  //       {
+  //         message: `Please set the "defaultIssueTitle" input in order to use the defaultIssueTitleComment.`
+  //       }
+  //     ]
+  //   }
+  // }
 
-  const regex5 = new RegExp(`^${defaultIssueTitle}`, 'mi')
+  // const regex5 = new RegExp(`^${defaultIssueTitle}`, 'mi')
 
-  if (!regex5.test(title)) {
-    return {
-      valid: false,
-      errors: [
-        {
-          message: defaultIssueTitleComment
-        }
-      ]
-    }
-  }
+  // if (!regex5.test(title)) {
+  //   return {
+  //     valid: false,
+  //     errors: [
+  //       {
+  //         message: defaultIssueTitleComment
+  //       }
+  //     ]
+  //   }
+  // }
 
   return { valid: true, errors: [] }
 }
